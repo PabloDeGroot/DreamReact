@@ -14,7 +14,7 @@ function Room() {
         <>
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
-                    <Dream />
+                    <Dream soundOn={true}/>
                 </div>
                 <Box className="callOptions">
                     <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
@@ -32,7 +32,7 @@ function Room() {
                     </Slide>
                     <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
-                            <Fab color="primary">
+                            <Fab onClick={()=>{toggleScreenCap(!isScreenCapOn)}}color={isScreenCapOn ? "secondary" : "primary"}>
                                 <Icon >
                                     desktop_windows
                                 </Icon>
@@ -41,7 +41,7 @@ function Room() {
                     </Slide>
                     <Slide direction='up' timeout={{ enter: 1000, exit: 1000 }} in={isOptionsExpanded}>
                         <Box>
-                            <Fab color="primary">
+                            <Fab onClick={()=>{toggleAudio(!isAudioOn)}}color={isAudioOn ? "primary" : "error"}>
                                 <Icon >
                                     headphones
                                 </Icon>
