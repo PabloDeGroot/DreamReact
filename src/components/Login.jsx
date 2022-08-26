@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Container, TextField } from "@mui/material"
-import image from "../back.png"
+import image from "../back.jpg"
 import { style } from "@mui/system";
 function Login() {
 
@@ -15,7 +15,9 @@ function Login() {
     }
 
     const start = () => {
-        navigate("/Room",{state:{input:inputValue}});
+        if (inputValue) {
+            navigate("/Room", { state: { user: inputValue } });
+        }
     }
 
     const flexBox = {
@@ -49,7 +51,7 @@ function Login() {
                     style: {
                         color: "white",
                     }
-                }} style={{ color: "white" }} onChange={evt => updateInputValue(evt)} id="outlined-basic" label="Usuario" variant="outlined" />
+                }} style={{ color: "white" }} onChange={evt => updateInputValue(evt)} id="outlined-basic" label="Usuario" variant="filled" />
                 <Button style={{ marginTop: "5px" }} onClick={start} variant='contained'>Enviar</Button>
             </Container>
         </div>
