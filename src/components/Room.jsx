@@ -2,6 +2,7 @@ import { Fab, Icon, IconButton, Slide, Zoom } from '@mui/material';
 import { Box } from '@mui/system';
 import React from "react";
 import Draggable from 'react-draggable';
+import ReactPlayer from 'react-player'
 
 
 function Room() {
@@ -10,17 +11,39 @@ function Room() {
     const [isMicOn, toggleMic] = React.useState(true);
     const [isScreenCapOn, toggleScreenCap] = React.useState(false);
     const [isAudioOn, toggleAudio] = React.useState(true);
+    const [stream, setLocalStream] = React.useState(null);
 
-    const startScreenCap = () => { }
-    const stopScreenCap = () => { }
+    const startScreenCap = () => {
+        console.log("starting..")
+        navigator.mediaDevices.getDisplayMedia({ video: true }).then(
+
+            (stream) => { 
+                setLocalStream(stream);
+                stream.getVideoTracks()[0].onended = function () {
+                    toggleScreenCap(false);
+                    setLocalStream(null);
+                  };
+                
+            }
+
+        )
+    }
+    const stopScreenCap = () => {
+        console.log("stopping...")
+        setLocalStream(null);
+        stream.getTracks().forEach(track => track.stop())
+    }
     const screenCapHandler = () => {
-        toggleScreenCap(!isScreenCapOn)
-        if (isScreenCapOn){
+        console.log("test");
+        toggleScreenCap(!isScreenCapOn);
+        if (!isScreenCapOn) {
             startScreenCap();
-        }else{
+        } else {
             stopScreenCap();
         }
-     }
+
+
+    }
     return (
         <>
             <div className="roomBack" >
@@ -30,7 +53,7 @@ function Room() {
                 {isScreenCapOn &&
                     <Draggable bounds="parent">
                         <div className='🎈'>
-                            <LocalDream />
+                            {stream && <LocalDream stream={stream} />}
                         </div>
                     </Draggable>
                 }
@@ -40,7 +63,6 @@ function Room() {
                 <Box className="callOptions">
                     <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
                         <Icon sx={{ color: "white" }}>{isOptionsExpanded ? "expand_more" : "expand_less"}</Icon>
-
                     </IconButton>
                     <Slide direction='up' in={isOptionsExpanded}>
                         <Box>
@@ -53,7 +75,7 @@ function Room() {
                     </Slide>
                     <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
-                            <Fab onClick={() => { toggleScreenCap(!isScreenCapOn) }} color={isScreenCapOn ? "secondary" : "primary"}>
+                            <Fab onClick={screenCapHandler} color={isScreenCapOn ? "secondary" : "primary"}>
                                 <Icon >
                                     desktop_windows
                                 </Icon>
@@ -125,15 +147,17 @@ function Dream(props) {
 }
 function LocalDream(props) {
     const [hover, setHover] = React.useState(false);
+    const [stream, setStream] = React.useState(props.stream);
+    console.log(stream);
 
     return (
         <>
             <div onMouseEnter={() => { setHover(true) }} onMouseLeave={() => { setHover(false) }} className="🏠☁" >
                 <div className="streamContainer" >
-                    transmision de pantalla local aqui
+                    <ReactPlayer playing muted width='100%' height="100%" url={stream}></ReactPlayer>
                 </div>
                 <Box className="options">
-                    <video src={props.stream}></video>
+
                 </Box>
 
             </div>

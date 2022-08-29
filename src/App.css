@@ -82,6 +82,8 @@
   position: relative;
   height: 100%;
   pointer-events: none;
+  width: 300px;
+
 }
 
 .callOptions {
@@ -114,8 +116,8 @@
 .🏠☁ {
   border-radius: 20px;
   background-color: aquamarine;
-  height: 250px;
-  width: 400px;
+  overflow: hidden;
+
   z-index: 1000;
   position: absolute;
   display: block;
