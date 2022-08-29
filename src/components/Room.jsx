@@ -1,7 +1,7 @@
 import { Fab, Icon, IconButton, Slide, Zoom } from '@mui/material';
 import { Box } from '@mui/system';
 import React from "react";
-import { useLocation } from "react-router-dom";
+import Draggable from 'react-draggable';
 
 
 function Room() {
@@ -10,12 +10,33 @@ function Room() {
     const [isMicOn, toggleMic] = React.useState(true);
     const [isScreenCapOn, toggleScreenCap] = React.useState(false);
     const [isAudioOn, toggleAudio] = React.useState(true);
+
+    const startScreenCap = () => { }
+    const stopScreenCap = () => { }
+    const screenCapHandler = () => {
+        toggleScreenCap(!isScreenCapOn)
+        if (isScreenCapOn){
+            startScreenCap();
+        }else{
+            stopScreenCap();
+        }
+     }
     return (
         <>
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
-                    <Dream soundOn={true}/>
+                    <Dream soundOn={true} />
                 </div>
+                {isScreenCapOn &&
+                    <Draggable bounds="parent">
+                        <div className='🎈'>
+                            <LocalDream />
+                        </div>
+                    </Draggable>
+                }
+
+
+
                 <Box className="callOptions">
                     <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
                         <Icon sx={{ color: "white" }}>{isOptionsExpanded ? "expand_more" : "expand_less"}</Icon>
@@ -23,16 +44,16 @@ function Room() {
                     </IconButton>
                     <Slide direction='up' in={isOptionsExpanded}>
                         <Box>
-                            <Fab onClick={()=>{toggleMic(!isMicOn)}}color={isMicOn ? "primary" : "error"} >
+                            <Fab onClick={() => { toggleMic(!isMicOn) }} color={isMicOn ? "primary" : "error"} >
                                 <Icon >
-                                    {isMicOn?"mic":"mic_off"}
+                                    {isMicOn ? "mic" : "mic_off"}
                                 </Icon>
                             </Fab>
                         </Box>
                     </Slide>
                     <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
-                            <Fab onClick={()=>{toggleScreenCap(!isScreenCapOn)}}color={isScreenCapOn ? "secondary" : "primary"}>
+                            <Fab onClick={() => { toggleScreenCap(!isScreenCapOn) }} color={isScreenCapOn ? "secondary" : "primary"}>
                                 <Icon >
                                     desktop_windows
                                 </Icon>
@@ -41,7 +62,7 @@ function Room() {
                     </Slide>
                     <Slide direction='up' timeout={{ enter: 1000, exit: 1000 }} in={isOptionsExpanded}>
                         <Box>
-                            <Fab onClick={()=>{toggleAudio(!isAudioOn)}}color={isAudioOn ? "primary" : "error"}>
+                            <Fab onClick={() => { toggleAudio(!isAudioOn) }} color={isAudioOn ? "primary" : "error"}>
                                 <Icon >
                                     headphones
                                 </Icon>
@@ -101,4 +122,22 @@ function Dream(props) {
             </div>
         </>
     )
+}
+function LocalDream(props) {
+    const [hover, setHover] = React.useState(false);
+
+    return (
+        <>
+            <div onMouseEnter={() => { setHover(true) }} onMouseLeave={() => { setHover(false) }} className="🏠☁" >
+                <div className="streamContainer" >
+                    transmision de pantalla local aqui
+                </div>
+                <Box className="options">
+                    <video src={props.stream}></video>
+                </Box>
+
+            </div>
+        </>
+    )
+
 }

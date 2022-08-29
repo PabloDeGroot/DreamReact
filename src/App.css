@@ -17,18 +17,19 @@
 
 
 .roomBack {
+  position: relative;
   background-image: url(./backRoom.jpg);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-  width: 100vw;
+  max-width: 100vw;
   height: 100vh;
 }
 
 .dreamContainer {
 
   box-sizing: border-box;
-  display:flex;
+  display: flex;
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: space-around;
@@ -37,9 +38,10 @@
   width: 100vw;
   height: 100vh;
   transition: 1s;
-  
+
 
 }
+
 .☁ {
   transition: 1s;
   display: none;
@@ -52,24 +54,28 @@
   background-color: aqua;
   max-width: 60%;
   max-height: 60%;
-  
-  
+
+
 }
-.dreamContainer.grid .☁{
+
+.dreamContainer.grid .☁ {
   display: block;
 }
+
 .☁.maximized {
   display: block;
   max-width: none;
   max-height: none;
 }
-.options{
+
+.options {
   position: absolute;
   left: 50%;
-  bottom:16px;
+  bottom: 16px;
   transform: translate(-50%, 0);
 }
-.streamContainer{
+
+.streamContainer {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -77,27 +83,51 @@
   height: 100%;
   pointer-events: none;
 }
-.callOptions{
+
+.callOptions {
   display: flex;
   padding: 10px;
-  position:absolute;
+  position: absolute;
   left: 50%;
-  bottom:0px;
+  bottom: 0px;
   height: 80px;
   overflow: hidden;
   transform: translate(-50%, 0);
-  
+
 }
+
 .callOptions * {
-  color:white; 
+  color: white;
   margin: 5px;
- 
+
 }
-.callOptions .showOptions{
+
+.callOptions .showOptions {
   display: flex;
   justify-content: center;
   position: absolute;
   bottom: -20px;
   left: 50%;
   transform: translate(-50%, 0);
+}
+
+.🏠☁ {
+  border-radius: 20px;
+  background-color: aquamarine;
+  height: 250px;
+  width: 400px;
+  z-index: 1000;
+  position: absolute;
+  display: block;
+}
+
+.🎈 {
+  position: absolute;
+  margin:40px;
+  left: 75%;
+  top:65%;
+
+}
+body {
+  overflow: hidden;
 }
