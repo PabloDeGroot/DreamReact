@@ -17,13 +17,13 @@ function Room() {
         console.log("starting..")
         navigator.mediaDevices.getDisplayMedia({ video: true }).then(
 
-            (stream) => { 
+            (stream) => {
                 setLocalStream(stream);
                 stream.getVideoTracks()[0].onended = function () {
                     toggleScreenCap(false);
-                    setLocalStream(null);
-                  };
-                
+                    stopScreenCap();
+                };
+
             }
 
         )
@@ -48,7 +48,11 @@ function Room() {
         <>
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
-                    <Dream soundOn={true} />
+                    {isScreenCapOn && stream &&
+                        <Dream stream={stream} />
+
+
+                    }
                 </div>
                 {isScreenCapOn &&
                     <Draggable bounds="parent">
@@ -128,7 +132,7 @@ function Dream(props) {
         <>
             <div onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} className="☁" >
                 <div className="streamContainer" >
-                    transmision de pantalla aqui
+                    <ReactPlayer playing width='100%' height="100%" url={props.stream}></ReactPlayer>
                 </div>
                 <Box className="options">
                     <Zoom in={hover}>
@@ -147,14 +151,13 @@ function Dream(props) {
 }
 function LocalDream(props) {
     const [hover, setHover] = React.useState(false);
-    const [stream, setStream] = React.useState(props.stream);
-    console.log(stream);
+
 
     return (
         <>
             <div onMouseEnter={() => { setHover(true) }} onMouseLeave={() => { setHover(false) }} className="🏠☁" >
                 <div className="streamContainer" >
-                    <ReactPlayer playing muted width='100%' height="100%" url={stream}></ReactPlayer>
+                    <ReactPlayer playing muted width='100%' height="100%" url={props.stream}></ReactPlayer>
                 </div>
                 <Box className="options">
 
