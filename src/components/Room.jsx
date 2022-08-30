@@ -3,7 +3,7 @@ import { Box } from '@mui/system';
 import React from "react";
 import Draggable from 'react-draggable';
 import ReactPlayer from 'react-player'
-
+import Peers, { Peer } from 'peerjs';
 
 function Room() {
     const [dreams, setDreams] = React.useState({ username: <Dream /> });
@@ -12,18 +12,21 @@ function Room() {
     const [isScreenCapOn, toggleScreenCap] = React.useState(false);
     const [isAudioOn, toggleAudio] = React.useState(true);
     const [stream, setLocalStream] = React.useState(null);
+    const [users, setUsers] = React.useState({});
+    const peer = new Peer();
+
 
     const startScreenCap = () => {
         console.log("starting..")
         navigator.mediaDevices.getDisplayMedia({ video: true }).then(
 
-            (stream) => { 
+            (stream) => {
                 setLocalStream(stream);
                 stream.getVideoTracks()[0].onended = function () {
                     toggleScreenCap(false);
                     setLocalStream(null);
-                  };
-                
+                };
+
             }
 
         )
@@ -128,7 +131,7 @@ function Dream(props) {
         <>
             <div onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} className="☁" >
                 <div className="streamContainer" >
-                    transmision de pantalla aqui
+                    <ReactPlayer playing muted width='100%' height="100%" url={stream}></ReactPlayer>
                 </div>
                 <Box className="options">
                     <Zoom in={hover}>
@@ -165,3 +168,24 @@ function LocalDream(props) {
     )
 
 }
+
+class User {
+    constructor(id, username) {
+        this.id = id;
+        this.username = username;
+
+    }
+    call(peer , stream, user) {
+        new Peer().call(this.id, stream, user)
+            .on('stream',
+                (stream) => { 
+                    return <Dream ></Dream>
+                }
+            ).on('error',
+                () => { }
+            ).on('close',
+                () => { }
+            )
+    }
+}
+
