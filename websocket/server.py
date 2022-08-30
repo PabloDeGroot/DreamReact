@@ -1,12 +1,11 @@
 import asyncio
 from http import client
 import json
-from multiprocessing import connection
- 
-import websockets
+
+from simple_websocket_server import WebSocketServer, WebSocket
  
 # create handler for each connection
-clients = []
+clients = set()
 connections = [] #no va ?? F#€@
 async def handler(websocket, path):
     
@@ -14,6 +13,7 @@ async def handler(websocket, path):
     if clients:
         await websocket.send(json.dumps(clients)) # enviar al conectado la lista de clientes
     print(data)
+    websocket
 
    
     clients.append(data)

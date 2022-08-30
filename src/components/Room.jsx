@@ -1,26 +1,63 @@
 import { Fab, Icon, IconButton, Slide, Zoom } from '@mui/material';
 import { Box } from '@mui/system';
-import React from "react";
+import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
-import ReactPlayer from 'react-player'
-import Peers, { MediaConnection, Peer } from 'peerjs';
-const peer = new Peer();
-const ws = new WebSocket("ws://localhost:8000");
+import ReactPlayer from 'react-player';
+import Peer from 'peerjs'; // usado para WebRTC
+import { io } from 'socket.io-client'; //usado para administrar usuarios
+
+var peer = new Peer({
+    config: {
+        'iceServers': [
+            { url: "stun:stun.l.google.com:19302" },
+            { url: "stun:stun1.l.google.com:19302" },
+            { url: "stun:stun2.l.google.com:19302" },
+            { url: "stun:stun3.l.google.com:19302" },
+            { url: "stun:stun4.l.google.com:19302" }
+        ]
+    }
+});
+const socket = io(":2000"); // TODO añadir dominio como parametro
+
 function Room() {
-    const [dreams, setDreams] = React.useState([<Dream />]);
+    const [dreams, setDreams] = React.useState([]);
     const [isOptionsExpanded, expandOptions] = React.useState(true);
     const [isMicOn, toggleMic] = React.useState(true);
     const [isScreenCapOn, toggleScreenCap] = React.useState(false);
     const [isAudioOn, toggleAudio] = React.useState(true);
     const [stream, setLocalStream] = React.useState(null);
     const [users, setUsers] = React.useState([]);
-    const [id, setID] = React.useState("connecting...");
 
-    peer.on("open", (id) => {
-        setID(id);
-        ws.send(JSON.stringify({ id: id, username: "test" }));
+    useEffect(() => {
+        socket.on("connect", () => {
+            if (peer.open) {
+                socket.emit("hello", { id: peer.id, username: "test" });
+            } else {
+                peer.on("open", (id) => {
+                    socket.emit("hello", { id: id, username: "test" });
+                });
+            }
+        });
+        socket.on("userlist", (users) => {
+            console.log(users);
+            setUsers(users);
+        });
+        socket.on("welcome", (user) => {
+            console.log(user);
+            setUsers((prevUsers) => [
+                ...prevUsers,
+                user
+            ])
+        })
+        return () => {
+            socket.off("connect");
+            socket.off("userList");
+            socket.off("welcome");
+        }
 
-    })
+    }, [])
+
+
     peer.removeListener('call').on('call', (call) => {
         console.log(call.metadata);
         call.answer();
@@ -35,14 +72,6 @@ function Room() {
 
     })
 
-    ws.onmessage = (e) => {
-        console.log(e);
-
-        setUsers((prevUsers) => [
-            ...prevUsers,
-            { username: e.data.username, id: e.data.id }
-        ])
-    }
 
 
     const startScreenCap = () => {
@@ -54,7 +83,7 @@ function Room() {
                 console.log(users);
 
                 users.map((user) => (
-                    peer.call(user.id, stream, { metadata: { username: "test" } })
+                    peer.call(user.id, stream, { metadata: { username: user.username } })
                 ));
 
 
@@ -80,7 +109,6 @@ function Room() {
         } else {
             stopScreenCap();
         }
-
 
     }
     return (
