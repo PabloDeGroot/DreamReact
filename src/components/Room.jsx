@@ -5,6 +5,7 @@ import Draggable from 'react-draggable';
 import ReactPlayer from 'react-player'
 import Peers, { MediaConnection, Peer } from 'peerjs';
 const peer = new Peer();
+const ws = new WebSocket("ws://localhost:8000");
 function Room() {
     const [dreams, setDreams] = React.useState([<Dream />]);
     const [isOptionsExpanded, expandOptions] = React.useState(true);
@@ -15,11 +16,16 @@ function Room() {
     const [users, setUsers] = React.useState([]);
     const [id, setID] = React.useState("connecting...");
 
-    peer.on("open", (id) => { setID(id) })
-    peer.on('call', (call) => {
+    peer.on("open", (id) => {
+        setID(id);
+        ws.send(JSON.stringify({ id: id, username: "test" }));
+
+    })
+    peer.removeListener('call').on('call', (call) => {
         console.log(call.metadata);
         call.answer();
         call.on('stream', (stream) => {
+            console.log(stream);
             setDreams((prevDreams) => [
                 ...prevDreams,
                 <Dream stream={stream} />
@@ -29,19 +35,27 @@ function Room() {
 
     })
 
+    ws.onmessage = (e) => {
+        console.log(e);
+
+        setUsers((prevUsers) => [
+            ...prevUsers,
+            { username: e.data.username, id: e.data.id }
+        ])
+    }
+
 
     const startScreenCap = () => {
-        console.log("starting..")
+
         navigator.mediaDevices.getDisplayMedia({ video: true }).then(
 
             (stream) => {
                 setLocalStream(stream);
+                console.log(users);
 
-                users.map((id) => (
-                    peer.call(id,stream,{metadata:{username:"test"}})
+                users.map((user) => (
+                    peer.call(user.id, stream, { metadata: { username: "test" } })
                 ));
-
-
 
 
                 stream.getVideoTracks()[0].onended = function () {
