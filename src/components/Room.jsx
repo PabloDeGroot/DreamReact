@@ -3,17 +3,31 @@ import { Box } from '@mui/system';
 import React from "react";
 import Draggable from 'react-draggable';
 import ReactPlayer from 'react-player'
-import Peers, { Peer } from 'peerjs';
-
+import Peers, { MediaConnection, Peer } from 'peerjs';
+const peer = new Peer();
 function Room() {
-    const [dreams, setDreams] = React.useState({ username: <Dream /> });
+    const [dreams, setDreams] = React.useState([<Dream />]);
     const [isOptionsExpanded, expandOptions] = React.useState(true);
     const [isMicOn, toggleMic] = React.useState(true);
     const [isScreenCapOn, toggleScreenCap] = React.useState(false);
     const [isAudioOn, toggleAudio] = React.useState(true);
     const [stream, setLocalStream] = React.useState(null);
-    const [users, setUsers] = React.useState({});
-    const peer = new Peer();
+    const [users, setUsers] = React.useState([]);
+    const [id, setID] = React.useState("connecting...");
+
+    peer.on("open", (id) => { setID(id) })
+    peer.on('call', (call) => {
+        console.log(call.metadata);
+        call.answer();
+        call.on('stream', (stream) => {
+            setDreams((prevDreams) => [
+                ...prevDreams,
+                <Dream stream={stream} />
+            ])
+
+        })
+
+    })
 
 
     const startScreenCap = () => {
@@ -22,11 +36,17 @@ function Room() {
 
             (stream) => {
                 setLocalStream(stream);
+
+                users.map((id) => (
+                    peer.call(id,stream,{metadata:{username:"test"}})
+                ));
+
+
+
+
                 stream.getVideoTracks()[0].onended = function () {
                     toggleScreenCap(false);
-
                     stopScreenCap();
-
                 };
 
             }
@@ -53,11 +73,7 @@ function Room() {
         <>
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
-                    {isScreenCapOn && stream &&
-                        <Dream stream={stream} />
-
-
-                    }
+                    {dreams}
                 </div>
                 {isScreenCapOn &&
                     <Draggable bounds="parent">
@@ -182,11 +198,11 @@ class User {
         this.username = username;
 
     }
-    call(peer , stream, user) {
-        new Peer().call(this.id, stream, user)
+    call(peer, stream, user) {
+        peer.call(this.id, stream, user)
             .on('stream',
-                (stream) => { 
-                    return <Dream ></Dream>
+                (stream) => {
+                    return <Dream stream={stream} />
                 }
             ).on('error',
                 () => { }
