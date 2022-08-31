@@ -1,4 +1,4 @@
-import { Fab, Icon, IconButton, Slide, Zoom } from '@mui/material';
+import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
@@ -11,14 +11,26 @@ var peer = new Peer({
 });
 const socket = io(":2000"); // TODO añadir dominio como parametro
 
+
 function Room() {
-    const [dreams, setDreams] = React.useState([]);
+    const [dreams, setDreams] = React.useState({});
     const [isOptionsExpanded, expandOptions] = React.useState(true);
     const [isMicOn, toggleMic] = React.useState(true);
     const [isScreenCapOn, toggleScreenCap] = React.useState(false);
     const [isAudioOn, toggleAudio] = React.useState(true);
     const [stream, setLocalStream] = React.useState(null);
     const [users, setUsers] = React.useState([]);
+    const [value, setValue] = React.useState(0); // integer state
+
+    const forceUpdate = () => {
+
+        setValue(value => value + 1); // update state to force render
+        // An function that increment 👆🏻 the previous state like here 
+        // is better than directly setting `value + 1`
+    }
+
+
+
 
     useEffect(() => {
         socket.on("connect", () => {
@@ -41,6 +53,7 @@ function Room() {
                 user
             ])
         })
+
         return () => {
             socket.off("connect");
             socket.off("userList");
@@ -51,17 +64,20 @@ function Room() {
 
 
     peer.removeListener('call').on('call', (call) => {
-        console.log(call.metadata);
+
         call.answer();
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
             console.log(test);
-
-            setDreams((prevDreams) => [
-                ...prevDreams,
-                <Dream stream={stream} />
-            ])
-
+            var auxDreams = dreams;
+            auxDreams[call.peer] = {
+                username: call.metadata.username,
+                stream: stream
+            }
+            setDreams(auxDreams);
+            console.log(auxDreams);
+            console.log(dreams);
+            forceUpdate();
 
 
         })
@@ -72,7 +88,7 @@ function Room() {
 
     const startScreenCap = () => {
 
-        navigator.mediaDevices.getDisplayMedia({ video: true }).then(
+        navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(
 
             (stream) => {
                 setLocalStream(stream);
@@ -110,8 +126,11 @@ function Room() {
     return (
         <>
             <div className="roomBack" >
-                <div className="dreamContainer grid" >
-                    {dreams}
+                <div test={dreams} className="dreamContainer grid" >
+                    {Object.keys(dreams).map((key) => {
+                        console.log(dreams[key]);
+                        return <Dream stream={dreams[key].stream} username={dreams[key].username}></Dream>
+                    })}
                 </div>
                 {isScreenCapOn &&
                     <Draggable bounds="parent">
@@ -164,12 +183,13 @@ export default Room;
 function Dream(props) {
     const [hover, setHover] = React.useState(false);
     const [volume, setVolume] = React.useState(50);
-    const [playT, setPlayT] = React.useState(false);
+    const [play, setPlay] = React.useState(false);
     const [soundOn, setSoundOn] = React.useState(props.soundOn);
 
     const videoReadyHandler = (e) => {
-        e.player.player.play();
+        delay(1000).then(() => { e.player.player.play(); });
         console.log(e);
+        setPlay(true);
     }
 
     const doubleClickHandler = (e) => {
@@ -192,9 +212,14 @@ function Dream(props) {
     return (
         <>
             <div onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} className="☁" >
+                {!play && <Box className='loading'>
+                    <CircularProgress />
+                </Box>}
+
                 <div className="streamContainer" >
 
-                    <ReactPlayer onReady={videoReadyHandler} autoplay={playT} width='100%' height="100%" url={props.stream}></ReactPlayer>
+
+                    <ReactPlayer onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
 
                 </div>
                 <Box className="options">
