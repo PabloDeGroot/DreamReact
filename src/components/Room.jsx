@@ -7,15 +7,7 @@ import Peer from 'peerjs'; // usado para WebRTC
 import { io } from 'socket.io-client'; //usado para administrar usuarios
 
 var peer = new Peer({
-    config: {
-        'iceServers': [
-            { url: "stun:stun.l.google.com:19302" },
-            { url: "stun:stun1.l.google.com:19302" },
-            { url: "stun:stun2.l.google.com:19302" },
-            { url: "stun:stun3.l.google.com:19302" },
-            { url: "stun:stun4.l.google.com:19302" }
-        ]
-    }
+
 });
 const socket = io(":2000"); // TODO añadir dominio como parametro
 
@@ -62,11 +54,15 @@ function Room() {
         console.log(call.metadata);
         call.answer();
         call.on('stream', (stream) => {
-            console.log(stream);
+            var test = stream.getVideoTracks()[0];
+            console.log(test);
+
             setDreams((prevDreams) => [
                 ...prevDreams,
                 <Dream stream={stream} />
             ])
+
+
 
         })
 
@@ -168,11 +164,13 @@ export default Room;
 function Dream(props) {
     const [hover, setHover] = React.useState(false);
     const [volume, setVolume] = React.useState(50);
+    const [playT, setPlayT] = React.useState(false);
     const [soundOn, setSoundOn] = React.useState(props.soundOn);
-    const fabStyle = {
-        position: 'absolute',
 
-    };
+    const videoReadyHandler = (e) => {
+        e.player.player.play();
+        console.log(e);
+    }
 
     const doubleClickHandler = (e) => {
 
@@ -196,7 +194,7 @@ function Dream(props) {
             <div onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} className="☁" >
                 <div className="streamContainer" >
 
-                    <ReactPlayer playing width='100%' height="100%" url={props.stream}></ReactPlayer>
+                    <ReactPlayer onReady={videoReadyHandler} autoplay={playT} width='100%' height="100%" url={props.stream}></ReactPlayer>
 
                 </div>
                 <Box className="options">
@@ -253,4 +251,6 @@ class User {
             )
     }
 }
-
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
