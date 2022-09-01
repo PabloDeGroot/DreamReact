@@ -1,7 +1,7 @@
 import { createServer } from "http"
 import { Server } from "socket.io"
-var https = require("https");
-fs = require("fs");
+let https = await import('node:https');
+import * as fs from 'fs';
 const httpServer = https.createServer(
     {
         key: fs.readFileSync("/etc/ssl/certs/dream.key"),

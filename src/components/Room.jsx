@@ -11,7 +11,7 @@ var peer = new Peer({
 
 });
 
-const socket = io(":2000",{secure:true}); // TODO añadir dominio como parametro
+const socket = io("https://34.140.134.78:2000",{secure:true}); // TODO añadir dominio como parametro
 
 
 function Room() {
