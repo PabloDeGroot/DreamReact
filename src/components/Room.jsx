@@ -9,7 +9,7 @@ import { io } from 'socket.io-client'; //usado para administrar usuarios
 var peer = new Peer({
 
 });
-const socket = io(":2000"); // TODO añadir dominio como parametro
+const socket = io(":2000",{secure:true}); // TODO añadir dominio como parametro
 
 
 function Room() {
