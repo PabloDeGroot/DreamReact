@@ -10,11 +10,8 @@ import FilePlayer from 'react-player/file';
 var peer = new Peer({
 
 });
-<<<<<<< HEAD
+
 const socket = io(":2000",{secure:true}); // TODO añadir dominio como parametro
-=======
-const socket = io("http://34.140.134.78:2000",{secure:true}); // TODO añadir dominio como parametro
->>>>>>> 67bced5221813609644e9ee20ab0ffed2e65df75
 
 
 function Room() {
