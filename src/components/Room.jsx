@@ -5,11 +5,12 @@ import Draggable from 'react-draggable';
 import ReactPlayer from 'react-player';
 import Peer from 'peerjs'; // usado para WebRTC
 import { io } from 'socket.io-client'; //usado para administrar usuarios
+import FilePlayer from 'react-player/file';
 
 var peer = new Peer({
 
 });
-const socket = io(":2000"); // TODO añadir dominio como parametro
+const socket = io("http://34.140.134.78:2000",{secure:true}); // TODO añadir dominio como parametro
 
 
 function Room() {
@@ -21,7 +22,7 @@ function Room() {
     const [stream, setLocalStream] = React.useState(null);
     const [users, setUsers] = React.useState([]);
     const [value, setValue] = React.useState(0); // integer state
-
+    const [spectators, setSpectators] = React.useState([]);
     const forceUpdate = () => {
 
         setValue(value => value + 1); // update state to force render
@@ -46,26 +47,22 @@ function Room() {
             console.log(users);
             setUsers(users);
         });
-        socket.on("welcome", (user) => {
-            console.log(user);
-            setUsers((prevUsers) => [
-                ...prevUsers,
-                user
-            ])
-        })
+
 
         return () => {
             socket.off("connect");
             socket.off("userList");
-            socket.off("welcome");
         }
 
     }, [])
 
-
-    peer.removeListener('call').on('call', (call) => {
-
+    peer.off('call').on('call', (call) => {
         call.answer();
+        call.on("iceStateChanged", (e) => {
+            if (e == "disconnected") {
+
+            }
+        })
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
             console.log(test);
@@ -74,17 +71,46 @@ function Room() {
                 username: call.metadata.username,
                 stream: stream
             }
+
             setDreams(auxDreams);
-            console.log(auxDreams);
-            console.log(dreams);
             forceUpdate();
+        });
 
-
+        call.on("error", (e) => {
+            console(e);
+            var auxDreams = dreams;
+            delete auxDreams[call.peer];
+            setDreams(auxDreams);
         })
+    })
+    socket.off("welcome").on("welcome", (user) => {
+        console.log(user);
+        setUsers((prevUsers) => [
+            ...prevUsers,
+            user
+        ])
+        if (stream) {
 
+            peer.call(user.id, stream, { metadata: { username: user.username } })
+
+        }
     })
 
+    socket.off("goodbye").on("goodbye", (id) => {
+        var auxDreams = dreams;
+        var auxUsers = users;
+        delete auxDreams[id];
+        delete auxUsers[id];
+        setDreams(auxDreams);
+        setUsers(auxUsers);
 
+    })
+    socket.off("wakeUp").on("wakeUp", (id) => {
+        var auxDreams = dreams;
+        delete auxDreams[id];
+        setDreams(auxDreams);
+        forceUpdate();
+    })
 
     const startScreenCap = () => {
 
@@ -94,14 +120,24 @@ function Room() {
                 setLocalStream(stream);
                 console.log(users);
 
-                users.map((user) => (
-                    peer.call(user.id, stream, { metadata: { username: user.username } })
-                ));
+                users.map((user) => {
+                    var spectator = peer.call(user.id, stream, { metadata: { username: "usernameTest" } });
+
+                    if (spectators) {
+                        setSpectators((prevSpectators) => [
+                            ...prevSpectators,
+                            spectator
+                        ]);
+                    } else {
+                        setSpectators([spectator]);
+                    }
+                });
 
 
                 stream.getVideoTracks()[0].onended = function () {
                     toggleScreenCap(false);
                     stopScreenCap();
+
                 };
 
             }
@@ -110,8 +146,15 @@ function Room() {
     }
     const stopScreenCap = () => {
         console.log("stopping...")
+        if (stream) {
+            stream.getVideoTracks().forEach((track) => { track.stop() })
+        }
         setLocalStream(null);
-        stream.getTracks().forEach(track => track.stop())
+        socket.emit("stop");
+        spectators.forEach((call) => { call.close() })
+        setSpectators.apply([]);
+      
+
     }
     const screenCapHandler = () => {
         console.log("test");
@@ -187,9 +230,17 @@ function Dream(props) {
     const [soundOn, setSoundOn] = React.useState(props.soundOn);
 
     const videoReadyHandler = (e) => {
-        delay(1000).then(() => { e.player.player.play(); });
+        delay(1000).then(() => {
+            try {
+                var a = e.player.player.player.play();
+                console.log(a);
+            } catch (e) {
+                console.log(e);
+            }
+        });
+
         console.log(e);
-        setPlay(true);
+
     }
 
     const doubleClickHandler = (e) => {
@@ -219,7 +270,9 @@ function Dream(props) {
                 <div className="streamContainer" >
 
 
-                    <ReactPlayer onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
+                    <ReactPlayer muted volume={volume} onPlay={() => { setPlay(true); }
+
+                    } onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
 
                 </div>
                 <Box className="options">
@@ -248,7 +301,6 @@ function LocalDream(props) {
                     <ReactPlayer playing muted width='100%' height="100%" url={props.stream}></ReactPlayer>
                 </div>
                 <Box className="options">
-
                 </Box>
 
             </div>
