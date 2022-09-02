@@ -17,6 +17,8 @@ function Login() {
     const start = () => {
         if (inputValue) {
             navigate("/Room", { state: { user: inputValue } });
+            window.location.reload();
+
         }
     }
 

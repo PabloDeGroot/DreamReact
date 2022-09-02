@@ -1,12 +1,9 @@
 import { createServer } from "http"
 import { Server } from "socket.io"
-let https = await import('node:https');
+let https = await import('node:http');
 import * as fs from 'fs';
 const httpServer = https.createServer(
-    {
-        key: fs.readFileSync("/etc/ssl/certs/dream.key"),
-        cert: fs.readFileSync("/etc/ssl/certs/dream.crt"),
-    }
+
 )
 
 
@@ -23,12 +20,14 @@ io.on("connection", (socket) => {
     // send to new connection all other users
     // send to all other users new connection
     socket.on('hello', (data) => {
-        console.log(data);
+        console.log("hello")
+        console.log(data)
         socket.emit("userlist", Object.values(users));
         users[socket.id] = {
             username: data.username,
             id: data.id
         }
+        console.log(users);
         socket.broadcast.emit("welcome", users[socket.id])
 
     })
@@ -36,8 +35,9 @@ io.on("connection", (socket) => {
         socket.broadcast.emit("wakeUp", users[socket.id].id);
     })
     socket.on('disconnect', () => {
+        console.log("disconnect");
         console.log(users[socket.id])
-        if (users[socket.id]) {
+        if (users[socket.id] != undefined) {
             io.emit("goodbye", users[socket.id].id);
             delete users[socket.id];
         }

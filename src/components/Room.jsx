@@ -1,17 +1,16 @@
-import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress } from '@mui/material';
+import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
 import ReactPlayer from 'react-player';
 import Peer from 'peerjs'; // usado para WebRTC
 import { io } from 'socket.io-client'; //usado para administrar usuarios
-import FilePlayer from 'react-player/file';
 
-var peer = new Peer({
+import { useSnackbar } from 'notistack';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-});
 
-const socket = io("https://34.140.134.78:2000",{secure:true}); // TODO añadir dominio como parametro
+const socket= io(":2000")
 
 
 function Room() {
@@ -22,25 +21,45 @@ function Room() {
     const [isAudioOn, toggleAudio] = React.useState(true);
     const [stream, setLocalStream] = React.useState(null);
     const [users, setUsers] = React.useState([]);
+    const { state } = useLocation();
+    const [user, setUser ] = React.useState(null);
+ 
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+   
+    const peer = new Peer({
+
+    });
+
     const forceUpdate = () => {
+
+
 
         setValue(value => value + 1); // update state to force render
         // An function that increment 👆🏻 the previous state like here 
         // is better than directly setting `value + 1`
     }
-
-
+    //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO
 
 
     useEffect(() => {
+
+        if (user == state.user){
+            return
+        }
+
+
+        console.log(state.user);
         socket.on("connect", () => {
+            console.log(state.user);
             if (peer.open) {
+                console.log(state.user);
                 socket.emit("hello", { id: peer.id, username: "test" });
             } else {
+                
                 peer.on("open", (id) => {
-                    socket.emit("hello", { id: id, username: "test" });
+                    socket.emit("hello", { id: id, username: state.user });
                 });
             }
         });
@@ -53,9 +72,12 @@ function Room() {
         return () => {
             socket.off("connect");
             socket.off("userList");
+            socket.off("welcome");
+            socket.off("goodbye");
         }
 
     }, [])
+
 
     peer.off('call').on('call', (call) => {
         call.answer();
@@ -85,28 +107,42 @@ function Room() {
         })
     })
     socket.off("welcome").on("welcome", (user) => {
+        enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
         console.log(user);
-        setUsers((prevUsers) => [
-            ...prevUsers,
-            user
-        ])
+        setUsers((prevUsers) => {
+            prevUsers = prevUsers.filter(Boolean);// algunos ids son strings otros no por algun motivo
+            return [
+                ...prevUsers,
+                user
+            ]
+        })
         if (stream) {
 
             peer.call(user.id, stream, { metadata: { username: user.username } })
 
         }
     })
-
     socket.off("goodbye").on("goodbye", (id) => {
+
+        var user = users.find(u => u.id == id);
+        if (user) {
+            enqueueSnackbar(user.username + " se a desconectado :c", { variant: 'error' });
+            var auxUsers = users;
+            delete auxUsers[users.indexOf(user)];
+            setUsers(auxUsers);
+        }
         var auxDreams = dreams;
-        var auxUsers = users;
+
+
         delete auxDreams[id];
-        delete auxUsers[id];
+
         setDreams(auxDreams);
-        setUsers(auxUsers);
+
 
     })
+
     socket.off("wakeUp").on("wakeUp", (id) => {
+
         var auxDreams = dreams;
         delete auxDreams[id];
         setDreams(auxDreams);
@@ -122,7 +158,7 @@ function Room() {
                 console.log(users);
 
                 users.map((user) => {
-                    var spectator = peer.call(user.id, stream, { metadata: { username: "usernameTest" } });
+                    var spectator = peer.call(user.id, stream, { metadata: { username: user } });
 
                     if (spectators) {
                         setSpectators((prevSpectators) => [
@@ -154,11 +190,11 @@ function Room() {
         socket.emit("stop");
         spectators.forEach((call) => { call.close() })
         setSpectators.apply([]);
-      
+
 
     }
     const screenCapHandler = () => {
-        console.log("test");
+
         toggleScreenCap(!isScreenCapOn);
         if (!isScreenCapOn) {
             startScreenCap();
@@ -170,7 +206,7 @@ function Room() {
     return (
         <>
             <div className="roomBack" >
-                <div test={dreams} className="dreamContainer grid" >
+                <div className="dreamContainer grid" >
                     {Object.keys(dreams).map((key) => {
                         console.log(dreams[key]);
                         return <Dream stream={dreams[key].stream} username={dreams[key].username}></Dream>
@@ -185,7 +221,6 @@ function Room() {
                 }
 
 
-
                 <Box className="callOptions">
                     <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
                         <Icon sx={{ color: "white" }}>{isOptionsExpanded ? "expand_more" : "expand_less"}</Icon>
@@ -193,7 +228,7 @@ function Room() {
                     <Slide direction='up' in={isOptionsExpanded}>
                         <Box>
                             <Fab onClick={() => { toggleMic(!isMicOn) }} color={isMicOn ? "primary" : "error"} >
-                                <Icon >
+                                <Icon>
                                     {isMicOn ? "mic" : "mic_off"}
                                 </Icon>
                             </Fab>
