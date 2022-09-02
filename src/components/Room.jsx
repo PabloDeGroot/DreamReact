@@ -46,7 +46,7 @@ function Room() {
 
     useEffect(() => {
 
-        if (user == state.user) {
+        if (null == state.user) {
             return
         }
 
