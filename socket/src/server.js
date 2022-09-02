@@ -12,10 +12,10 @@ const httpServer = https.createServer(
 
 const io = new Server(httpServer, {
     //path: "/socket/"
-    allowRequest: (req, callback) => {
-        const noOriginHeader = req.headers.origin === undefined;
-        callback(null, noOriginHeader);
-      }
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
 });
 var users = {}
 io.on("connection", (socket) => {
