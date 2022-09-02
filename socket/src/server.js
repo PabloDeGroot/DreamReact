@@ -12,6 +12,10 @@ const httpServer = https.createServer(
 
 const io = new Server(httpServer, {
     //path: "/socket/"
+cors:{
+    origin: "https://34.140.134.78:3000/",
+    methods: ["GET", "POST"]
+}
 });
 var users = {}
 io.on("connection", (socket) => {
