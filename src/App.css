@@ -43,6 +43,7 @@
 }
 
 .☁ {
+  backdrop-filter: blur(10px);
   transition: 1s;
   display: none;
   position: relative;
@@ -54,7 +55,7 @@
   background-color: #00ffff69;
   max-width: 55%;
   max-height: 60%;
-
+  box-shadow: 0px 0px 41px -11px rgba(0,0,0,1);
 }
 
 .dreamContainer.grid .☁ {

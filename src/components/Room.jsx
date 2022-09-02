@@ -1,4 +1,4 @@
-import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress, Snackbar, Alert, Paper, Typography, Collapse } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
@@ -10,7 +10,7 @@ import { useSnackbar } from 'notistack';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 
-const socket= io(":2000")
+const socket = io(":2000")
 
 
 function Room() {
@@ -22,12 +22,12 @@ function Room() {
     const [stream, setLocalStream] = React.useState(null);
     const [users, setUsers] = React.useState([]);
     const { state } = useLocation();
-    const [user, setUser ] = React.useState(null);
- 
+    const [user, setUser] = React.useState(null);
+
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-   
+
     const peer = new Peer({
 
     });
@@ -40,31 +40,32 @@ function Room() {
         // An function that increment 👆🏻 the previous state like here 
         // is better than directly setting `value + 1`
     }
-    //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO
+    //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO 
+    //TODO AL MANDAR LOS USUARIOS AL SERVIDOR LA ID NO COINCIDE?
 
 
     useEffect(() => {
 
-        if (user == state.user){
+        if (user == state.user) {
             return
         }
 
 
-        console.log(state.user);
+
         socket.on("connect", () => {
-            console.log(state.user);
+
             if (peer.open) {
-                console.log(state.user);
+
                 socket.emit("hello", { id: peer.id, username: "test" });
             } else {
-                
+
                 peer.on("open", (id) => {
                     socket.emit("hello", { id: id, username: state.user });
                 });
             }
         });
         socket.on("userlist", (users) => {
-            console.log(users);
+
             setUsers(users);
         });
 
@@ -88,7 +89,7 @@ function Room() {
         })
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
-            console.log(test);
+            console.log(call.peer);
             var auxDreams = dreams;
             auxDreams[call.peer] = {
                 username: call.metadata.username,
@@ -108,7 +109,7 @@ function Room() {
     })
     socket.off("welcome").on("welcome", (user) => {
         enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
-        console.log(user);
+
         setUsers((prevUsers) => {
             prevUsers = prevUsers.filter(Boolean);// algunos ids son strings otros no por algun motivo
             return [
@@ -125,6 +126,7 @@ function Room() {
     socket.off("goodbye").on("goodbye", (id) => {
 
         var user = users.find(u => u.id == id);
+        console.log(user);
         if (user) {
             enqueueSnackbar(user.username + " se a desconectado :c", { variant: 'error' });
             var auxUsers = users;
@@ -132,8 +134,8 @@ function Room() {
             setUsers(auxUsers);
         }
         var auxDreams = dreams;
-
-
+  
+        console.log(dreams)
         delete auxDreams[id];
 
         setDreams(auxDreams);
@@ -144,6 +146,7 @@ function Room() {
     socket.off("wakeUp").on("wakeUp", (id) => {
 
         var auxDreams = dreams;
+
         delete auxDreams[id];
         setDreams(auxDreams);
         forceUpdate();
@@ -155,10 +158,10 @@ function Room() {
 
             (stream) => {
                 setLocalStream(stream);
-                console.log(users);
+
 
                 users.map((user) => {
-                    var spectator = peer.call(user.id, stream, { metadata: { username: user } });
+                    var spectator = peer.call(user.id, stream, { metadata: { username: user.username } });
 
                     if (spectators) {
                         setSpectators((prevSpectators) => [
@@ -208,7 +211,7 @@ function Room() {
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
                     {Object.keys(dreams).map((key) => {
-                        console.log(dreams[key]);
+
                         return <Dream stream={dreams[key].stream} username={dreams[key].username}></Dream>
                     })}
                 </div>
@@ -264,18 +267,18 @@ function Dream(props) {
     const [volume, setVolume] = React.useState(50);
     const [play, setPlay] = React.useState(false);
     const [soundOn, setSoundOn] = React.useState(props.soundOn);
+    const [maximized, setMaximized] = React.useState(false);
+
 
     const videoReadyHandler = (e) => {
-        delay(1000).then(() => {
+        delay(100).then(() => {
             try {
                 var a = e.player.player.player.play();
-                console.log(a);
             } catch (e) {
                 console.log(e);
             }
         });
 
-        console.log(e);
 
     }
 
@@ -283,23 +286,30 @@ function Dream(props) {
 
         var target = e.target;
         if (target.classList.contains("☁")) {
-            console.log(target);
+        
             var parent = target.parentElement;
             parent.classList.toggle("grid");
             target.classList.toggle("maximized")
+            setMaximized(!maximized);
             setHover(false);
         }
     }
     const handleMouseOver = (e) => {
-        if (!e.currentTarget.classList.contains("maximized")) {
+        if (!maximized) {
             setHover(true)
-            console.log(props);
+
         }
     }
     return (
         <>
             <div onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} className="☁" >
-                {!play && <Box className='loading'>
+                <Collapse style={{ zIndex: 100, position: "absolute", width: "100%" }} in={hover}>
+                    <Paper square style={{ opacity: 0.5, backdropFilter: "blur(50px)" }}  >
+                        <Box justifyContent={"center"} textAlign={"center"}><Typography fontWeight={"bold"}>{props.username}</Typography></Box>
+                    </Paper>
+                </Collapse>
+                {!play &&
+                <Box className='loading'>
                     <CircularProgress />
                 </Box>}
 

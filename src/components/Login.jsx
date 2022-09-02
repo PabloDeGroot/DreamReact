@@ -38,10 +38,7 @@ function Login() {
         width: "100vw",
         height: "100vh",
     }
-    const link = {
-        pathname: "/category/595212758daa6810cbba4104",
-        param1: "Par1"
-    }
+
     return (
         <div style={background}>
             <Container style={flexBox} maxWidth="md">
