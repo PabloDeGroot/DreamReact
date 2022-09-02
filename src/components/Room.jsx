@@ -11,6 +11,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 
 const socket = io(":2000")
+const peer = new Peer({
+
+});
 
 
 function Room() {
@@ -28,9 +31,6 @@ function Room() {
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-    const peer = new Peer({
-
-    });
 
     const forceUpdate = () => {
 
@@ -139,6 +139,7 @@ function Room() {
         delete auxDreams[id];
 
         setDreams(auxDreams);
+        forceUpdate();
 
 
     })
@@ -355,25 +356,7 @@ function LocalDream(props) {
 
 }
 
-class User {
-    constructor(id, username) {
-        this.id = id;
-        this.username = username;
 
-    }
-    call(peer, stream, user) {
-        peer.call(this.id, stream, user)
-            .on('stream',
-                (stream) => {
-                    return <Dream stream={stream} />
-                }
-            ).on('error',
-                () => { }
-            ).on('close',
-                () => { }
-            )
-    }
-}
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
