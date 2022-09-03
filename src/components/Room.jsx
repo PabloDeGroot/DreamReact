@@ -56,7 +56,7 @@ function Room() {
 
             if (peer.open) {
 
-                socket.emit("hello", { id: peer.id, username: "test" });
+                socket.emit("hello", { id: peer.id, username: state.user });
             } else {
 
                 peer.on("open", (id) => {
@@ -265,9 +265,9 @@ function Room() {
 export default Room;
 function Dream(props) {
     const [hover, setHover] = React.useState(false);
-    const [volume, setVolume] = React.useState(50);
+    const [volume, setVolume] = React.useState(1);
     const [play, setPlay] = React.useState(false);
-    const [soundOn, setSoundOn] = React.useState(props.soundOn);
+    const [soundOn, setSoundOn] = React.useState(false);
     const [maximized, setMaximized] = React.useState(false);
 
 
@@ -317,7 +317,7 @@ function Dream(props) {
                 <div className="streamContainer" >
 
 
-                    <ReactPlayer muted volume={volume} onPlay={() => { setPlay(true); }
+                    <ReactPlayer muted={soundOn} volume={volume} onPlay={() => { setPlay(true); }
 
                     } onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
 
