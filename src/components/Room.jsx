@@ -345,7 +345,7 @@ function LocalDream(props) {
         <>
             <div onMouseEnter={() => { setHover(true) }} onMouseLeave={() => { setHover(false) }} className="🏠☁" >
                 <div className="streamContainer" >
-                    <ReactPlayer playing muted width='100%' height="100%" url={props.stream}></ReactPlayer>
+                    <ReactPlayer playing volume={0} muted width='100%' height="100%" url={props.stream}></ReactPlayer>
                 </div>
                 <Box className="options">
                 </Box>
