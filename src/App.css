@@ -149,3 +149,25 @@
 body {
   overflow: hidden;
 }
+.userList{
+  position:absolute;
+  display: block;
+  border-radius: 10px;
+  bottom:15px;
+  right:15px;
+  opacity: 0;
+  
+}
+.userList:hover{
+  opacity: 100;
+}
+.userList > div{
+  border-top: #00000060 solid 1px;
+  padding: 10px;
+  transition:0.3s;
+  user-select: none;
+
+}
+.userList > div:hover{
+  background-color: #00000020;
+}

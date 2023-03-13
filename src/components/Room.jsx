@@ -42,6 +42,9 @@ function Room() {
     }
     //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO 
     //TODO AL MANDAR LOS USUARIOS AL SERVIDOR LA ID NO COINCIDE?
+    //TODO DREAM MUESTRA EL USERNAME DEL USUARIO ESPECTADOR NO DEL TRANMISOR
+    //TODO LIMPIAR Y OPTIMIZAR CODIGO
+    //TODO HACER QUE DREAM TENGA SONIDO SI EL USUARIO A INTERACIONADO CON LA PAGINA SINO NO.
 
 
     useEffect(() => {
@@ -134,7 +137,7 @@ function Room() {
             setUsers(auxUsers);
         }
         var auxDreams = dreams;
-  
+
         console.log(dreams)
         delete auxDreams[id];
 
@@ -257,7 +260,10 @@ function Room() {
                         </Box>
                     </Slide>
                 </Box>
+                <UserList user={state.user} users={users}/>
+                
             </div>
+            
         </>
     );
 
@@ -271,7 +277,7 @@ function Dream(props) {
     const [maximized, setMaximized] = React.useState(false);
 
 
-    const videoReadyHandler = (e) => {
+    const videoReadyHandler = (e) => { // Inecesario, el video no se reproduce por que no interactua el usuario con la pagina. (Mutear el video, hacer que el usuario desmuteo)
         delay(100).then(() => {
             try {
                 var a = e.player.player.player.play();
@@ -287,7 +293,7 @@ function Dream(props) {
 
         var target = e.target;
         if (target.classList.contains("☁")) {
-        
+
             var parent = target.parentElement;
             parent.classList.toggle("grid");
             target.classList.toggle("maximized")
@@ -310,9 +316,9 @@ function Dream(props) {
                     </Paper>
                 </Collapse>
                 {!play &&
-                <Box className='loading'>
-                    <CircularProgress />
-                </Box>}
+                    <Box className='loading'>
+                        <CircularProgress />
+                    </Box>}
 
                 <div className="streamContainer" >
 
@@ -356,6 +362,32 @@ function LocalDream(props) {
 
 }
 
+function UserList(props) {
+    const users = renderUsers(props.users);
+    users.push(<div>{props.user}</div>)
+    console.log(users)
+    return (
+
+        <div className='userList ☁'>
+
+            {users}
+
+
+        </div>
+    )
+
+}
+function renderUsers(users) {
+    console.log(users);
+    if (users.length > 0) {
+        return users.map((user, index) => {
+            return <div>{user.username}</div>
+        })
+    } else {
+        return [];
+    }
+
+}
 
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
