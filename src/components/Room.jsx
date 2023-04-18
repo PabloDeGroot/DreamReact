@@ -4,19 +4,23 @@ import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
 import ReactPlayer from 'react-player';
 import Peer from 'peerjs'; // usado para WebRTC
-import { io } from 'socket.io-client'; //usado para administrar usuarios
 
 import { useSnackbar } from 'notistack';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate , useParams} from 'react-router-dom';
+import { io } from 'socket.io-client'; //usado para administrar usuarios
 
 
-const socket = io(":2000")
 const peer = new Peer({
 
 });
 
 
-function Room() {
+function Room(props) {
+    let navigate = useNavigate();
+    const {room} =  useParams()
+
+
+    const socket = props.socket;
     const [dreams, setDreams] = React.useState({});
     const [isOptionsExpanded, expandOptions] = React.useState(true);
     const [isMicOn, toggleMic] = React.useState(true);
@@ -26,7 +30,7 @@ function Room() {
     const [users, setUsers] = React.useState([]);
     const { state } = useLocation();
     const [user, setUser] = React.useState(null);
-
+    const [userid,setUserID] = React.useState(null);
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -40,6 +44,10 @@ function Room() {
         // An function that increment 👆🏻 the previous state like here 
         // is better than directly setting `value + 1`
     }
+
+    console.log(room)
+
+
     //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO 
     //TODO AL MANDAR LOS USUARIOS AL SERVIDOR LA ID NO COINCIDE?
     //TODO DREAM MUESTRA EL USERNAME DEL USUARIO ESPECTADOR NO DEL TRANMISOR
@@ -48,22 +56,20 @@ function Room() {
 
 
     useEffect(() => {
-
-        if (null == state.user) {
-            return
+        console.log(state)
+        if (state == null||state.user == null) {
+            navigate("/");
         }
-
-
-
+        
         socket.on("connect", () => {
 
             if (peer.open) {
 
-                socket.emit("hello", { id: peer.id, username: state.user });
+                socket.emit("hello", { id: peer.id, username: user,room:room });
             } else {
 
                 peer.on("open", (id) => {
-                    socket.emit("hello", { id: id, username: state.user });
+                    socket.emit("hello", { id: id, username: user });
                 });
             }
         });
@@ -92,12 +98,20 @@ function Room() {
         })
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
+            
             console.log(call.peer);
             var auxDreams = dreams;
             auxDreams[call.peer] = {
                 username: call.metadata.username,
                 stream: stream
             }
+            setInterval(()=>{
+                call.peerConnection.getStats(test).then((stats)=>{
+                    stats.forEach((stat)=>{
+                        console.log(stat);
+                    })
+                })
+            },10000)
 
             setDreams(auxDreams);
             forceUpdate();
@@ -158,7 +172,13 @@ function Room() {
 
     const startScreenCap = () => {
 
-        navigator.mediaDevices.getDisplayMedia({ video: true, audio: true }).then(
+
+        var video_constraints = {
+
+            optional: []
+        };
+
+        navigator.mediaDevices.getDisplayMedia({ video: video_constraints, audio: true }).then(
 
             (stream) => {
                 setLocalStream(stream);
@@ -215,7 +235,6 @@ function Room() {
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
                     {Object.keys(dreams).map((key) => {
-
                         return <Dream stream={dreams[key].stream} username={dreams[key].username}></Dream>
                     })}
                 </div>
@@ -226,8 +245,6 @@ function Room() {
                         </div>
                     </Draggable>
                 }
-
-
                 <Box className="callOptions">
                     <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
                         <Icon sx={{ color: "white" }}>{isOptionsExpanded ? "expand_more" : "expand_less"}</Icon>
@@ -260,7 +277,7 @@ function Room() {
                         </Box>
                     </Slide>
                 </Box>
-                <UserList user={state.user} users={users}/>
+                <UserList user={user} users={users}/>
                 
             </div>
             
@@ -366,9 +383,7 @@ function LocalDream(props) {
                     
                     ></ReactPlayer>
                 </div>
-                <Box className="options">
-                    tadsaad
-                </Box>
+
 
             </div>
         </>

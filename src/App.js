@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import { Peer } from "peerjs";
+import { io } from 'socket.io-client'; //usado para administrar usuarios
 
 import React from 'react';
 import {
@@ -18,21 +19,22 @@ import Login from './components/Login';
 import Room from './components/Room';
 
 
+const socket = io(":2000")
 
 function App() {
 
   return (
     <>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
       <Router>
 
         <Routes>
           <Route exact path="/" element={
-            <Login />
+            <Login socket={socket} />
           } />
-          <Route exact path="/Room" element={
-            <Room />
-          } />
+          <Route path="/Room/:room"
+            element={<Room socket={socket} />}
+          />
         </Routes>
       </Router>
     </>
