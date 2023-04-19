@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
 import ReactPlayer from 'react-player';
 import Peer from 'peerjs'; // usado para WebRTC
+import useLocalStorage from '../Hooks/MyHooks';
 
 import { useSnackbar } from 'notistack';
 import { useLocation, useNavigate , useParams} from 'react-router-dom';
@@ -29,7 +30,7 @@ function Room(props) {
     const [stream, setLocalStream] = React.useState(null);
     const [users, setUsers] = React.useState([]);
     const { state } = useLocation();
-    const [user, setUser] = React.useState(null);
+    const [user, setUser] = useLocalStorage('user', null);
     const [userid,setUserID] = React.useState(null);
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
@@ -45,7 +46,7 @@ function Room(props) {
         // is better than directly setting `value + 1`
     }
 
-    console.log(room)
+
 
 
     //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO 
@@ -56,8 +57,8 @@ function Room(props) {
 
 
     useEffect(() => {
-        console.log(state)
-        if (state == null||state.user == null) {
+
+        if (!user) {
             navigate("/");
         }
         
@@ -65,16 +66,15 @@ function Room(props) {
 
             if (peer.open) {
 
-                socket.emit("hello", { id: peer.id, username: user,room:room });
+                socket.emit("hello", { id: peer.id+"", username: user.username,room:room });
             } else {
 
                 peer.on("open", (id) => {
-                    socket.emit("hello", { id: id, username: user });
+                    socket.emit("hello", { id: id+"", username: user.username });
                 });
             }
         });
         socket.on("userlist", (users) => {
-
             setUsers(users);
         });
 
@@ -87,7 +87,6 @@ function Room(props) {
         }
 
     }, [])
-
 
     peer.off('call').on('call', (call) => {
         call.answer();
@@ -393,8 +392,8 @@ function LocalDream(props) {
 
 function UserList(props) {
     const users = renderUsers(props.users);
-    users.push(<div>{props.user}</div>)
-    console.log(users)
+    console.log(props)
+    users.push(<div>{props.user.username}</div>)
     return (
 
         <div className='userList ☁'>
@@ -410,6 +409,7 @@ function renderUsers(users) {
     console.log(users);
     if (users.length > 0) {
         return users.map((user, index) => {
+            console.log("AAAAA")
             return <div>{user.username}</div>
         })
     } else {

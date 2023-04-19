@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Container, TextField, InputAdornment } from "@mui/material"
 import image from "../back.jpg"
-import axios from "axios";
 import {Buffer} from 'buffer';
+import useLocalStorage from '../Hooks/MyHooks';
 
 import { useSnackbar } from 'notistack';
 import { v4 } from 'uuid';
@@ -11,7 +11,7 @@ function Login(props) {
 
     const io = props.socket;
 
-
+    const [user,setUser] = useLocalStorage('user',null);
     const [usernameValue, setUsername] = useState('')
     const [PasswordValue, setPassword] = useState('')
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -21,6 +21,11 @@ function Login(props) {
         const val = e.target.value;
         setUsername(val)
     }
+    useEffect(() => {
+        if(user){
+            navigate("/Room/"+getRandomName(), { state: { user: user.username, user_id: user.user_id } });
+        }
+    }, [user])
 
     const updatePassword = (e) => {
         const val = e.target.value;
@@ -29,6 +34,7 @@ function Login(props) {
     const login = () => {
 
         io.emit("login", { username: usernameValue, password: PasswordValue });
+        //setUser({username:usernameValue,user_id:call.user_id});
         //navigate("/Room", { state: { user: usernameValue } });
         //window.location.reload();
 
@@ -38,12 +44,11 @@ function Login(props) {
         io.emit("register", { username: usernameValue, password: PasswordValue });
     }
 
-
-
     io.off('login').on('login', (call) => {
         console.log(call);
         if (call.success) {
-            navigate("/Room/"+getRandomName(), { state: { user: usernameValue, user_id: call.user_id } });
+            setUser({username:usernameValue,user_id:call.user_id});
+            navigate("/Room/"+getRandomName());
             enqueueSnackbar("Welcome " + call.username, { variant: 'success' })
 
             //window.location.reload();
@@ -52,7 +57,6 @@ function Login(props) {
             enqueueSnackbar("Login Failed", { variant: 'error' })
         }
     });
-
 
     const flexBox = {
         display: "flex",
@@ -122,6 +126,9 @@ function Login(props) {
         
         // convert to base64
         let base64String = Buffer.from(hexString, "hex").toString("base64").replace(/[^a-zA-Z ]/g, "");
+        if (base64String == null){
+            return getRandomName();
+        }
         
         return base64String;
     }

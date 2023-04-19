@@ -89,6 +89,7 @@ const io = new Server(httpServer, {
     }
 });
 var rooms = {}
+var globalUsers = {}
 io.on("connection", (socket) => {
 
     console.log("new connection");
@@ -98,32 +99,41 @@ io.on("connection", (socket) => {
         socket.join(data.room)
         console.log("hello")
         console.log(data)
-        socket.emit("userlist", Object.values(users));
-        var users = rooms[data.room]
+        let users = rooms[data.room]
         if (users == undefined) {
             rooms[data.room] = {}
             users = rooms[data.room]
         }
-        users[socket.id] = {
+
+        rooms[data.room][socket.id] = {
             username: data.username,
             id: data.id
         }
-        console.log(users);
-        socket.to(data.room).emit("welcome", users[socket.id])
+        globalUsers[socket.id] = {
+            id: data.id,
+            room: data.room
+        }
+
+        //console.log(users);
+        socket.to(data.room).emit("welcome", rooms[data.room][socket.id])
+        socket.emit("userlist", Object.values(users));
 
     })
     socket.on("stop", (data) => {
         socket.to(data.room).emit("wakeUp", rooms[data.room][socket.id].id);
     })
-    socket.on('disconnect', (data) => {
+    socket.on('disconnect', () => {
         console.log("disconnect");
-        console.log(rooms[data.room][socket.id])
-        if (users[socket.id] != undefined) {
-            io.emit("goodbye", rooms[data.room][socket.id].id);
-            delete rooms[data.room][socket.id];
-            if (Object.keys(rooms[data.room]).length == 0) {
-                delete rooms[data.room]
+            let user = globalUsers[socket.id]    
+            console.log(user)
+            console.log(rooms)
+        if (user != undefined) {
+            socket.to(user.room).emit("goodbye", user.id);
+            delete rooms[user.room][user.id];
+            if (Object.keys(rooms[user.room]).length == 0) {
+                delete rooms[user.room]
             }
+            delete globalUsers[socket.id]
         }
     })
 
