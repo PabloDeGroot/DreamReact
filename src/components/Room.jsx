@@ -70,7 +70,7 @@ function Room(props) {
             } else {
 
                 peer.on("open", (id) => {
-                    socket.emit("hello", { id: id+"", username: user.username });
+                    socket.emit("hello", { id: id+"", username: user.username,room:room });
                 });
             }
         });

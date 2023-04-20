@@ -96,7 +96,6 @@ io.on("connection", (socket) => {
     // send to new connection all other users
     // send to all other users new connection
     socket.on('hello', (data) => {
-        socket.join(data.room)
         console.log("hello")
         console.log(data)
         let users = rooms[data.room]
@@ -116,7 +115,8 @@ io.on("connection", (socket) => {
 
         //console.log(users);
         socket.to(data.room).emit("welcome", rooms[data.room][socket.id])
-        socket.emit("userlist", Object.values(users));
+        socket.join(data.room)
+        socket.emit("userlist", Object.values(users).filter((user) => user.id != data.id));
 
     })
     socket.on("stop", (data) => {
@@ -125,11 +125,11 @@ io.on("connection", (socket) => {
     socket.on('disconnect', () => {
         console.log("disconnect");
             let user = globalUsers[socket.id]    
-            console.log(user)
             console.log(rooms)
+
         if (user != undefined) {
             socket.to(user.room).emit("goodbye", user.id);
-            delete rooms[user.room][user.id];
+            delete rooms[user.room][socket.id];
             if (Object.keys(rooms[user.room]).length == 0) {
                 delete rooms[user.room]
             }
