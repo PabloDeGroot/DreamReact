@@ -56,7 +56,41 @@ const login = async (username, password) => {
             });
     })
 }
-const register = (username, password) => {
+
+const userExists = (username) =>{
+    let columns = {
+        username: 'username',
+        password: 'password',
+        user_id: 'user_id'
+    }
+    let data = []
+    return new Promise(function (resolve, reject) {
+        fs.createReadStream("users.csv")
+            .pipe(csv.parse({ headers: true , columns: true}))
+            .on('error', error => reject(error))
+            .on('data', row => data.push(row))
+            .on('end', () => {
+                console.log("data")
+                console.log(data)
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].username == username) {
+                        console.log("user found")
+                        resolve(true)
+                        break;
+                    }
+                }
+                resolve(false)
+            });
+    })
+    
+}
+
+const register = async (username, password) => {
+
+    if (await userExists(username)) {
+        return false
+    }
+
 
     let columns = {
         username: 'username',
@@ -123,6 +157,8 @@ io.on("connection", (socket) => {
             delete rooms[data.room][socket.id];
             if (Object.keys(rooms[data.room]).length == 0) {
                 delete rooms[data.room]
+
+                
             }
         }
     })
@@ -154,3 +190,4 @@ io.on("connection", (socket) => {
 
 httpServer.listen(2000);
 console.log("starting server on port 2000")
+
