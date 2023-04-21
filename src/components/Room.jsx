@@ -40,7 +40,7 @@ function Room(props) {
     const forceUpdate = () => {
 
 
-
+        console.log(user);
         setValue(value => value + 1); // update state to force render
         // An function that increment 👆🏻 the previous state like here 
         // is better than directly setting `value + 1`
@@ -48,6 +48,7 @@ function Room(props) {
 
 
 
+    
 
     //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO 
     //TODO AL MANDAR LOS USUARIOS AL SERVIDOR LA ID NO COINCIDE?
@@ -58,10 +59,9 @@ function Room(props) {
 
     useEffect(() => {
 
-        if (!user) {
+        if (user == null) {
             navigate("/");
         }
-        
         socket.on("connect", () => {
 
             if (peer.open) {
@@ -276,7 +276,7 @@ function Room(props) {
                         </Box>
                     </Slide>
                 </Box>
-                <UserList user={user} users={users}/>
+                {user &&<UserList user={user} users={users}/>}
                 
             </div>
             
