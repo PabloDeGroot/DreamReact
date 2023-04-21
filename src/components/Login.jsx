@@ -1,49 +1,73 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Container, TextField, InputAdornment } from "@mui/material"
+import { Button, Container, TextField, InputAdornment, Paper, Box, Typography, ToggleButtonGroup, ToggleButton } from "@mui/material"
 import image from "../back.jpg"
-import axios from "axios";
-import {Buffer} from 'buffer';
-
+import { Buffer } from 'buffer';
+import useLocalStorage from '../Hooks/MyHooks';
+import { useTheme } from '@mui/material/styles';
 import { useSnackbar } from 'notistack';
 import { v4 } from 'uuid';
 function Login(props) {
-
+    const theme = useTheme();
     const io = props.socket;
-
-
+    const [user, setUser] = useLocalStorage('user', null);
     const [usernameValue, setUsername] = useState('')
     const [PasswordValue, setPassword] = useState('')
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const [isLoginPage, setIsLoginPage] = useState(true);
+
 
     let navigate = useNavigate();
     const updateUsername = (e) => {
         const val = e.target.value;
         setUsername(val)
     }
+    useEffect(() => {
+        if (user && false) {
+            navigate("/Room/" + getRandomName(), { state: { user: user.username, user_id: user.user_id } });
+        }
+    }, [user])
+    
+
 
     const updatePassword = (e) => {
         const val = e.target.value;
         setPassword(val)
     }
-    const login = () => {
+    const loginOrRegister = () => {
 
-        io.emit("login", { username: usernameValue, password: PasswordValue });
+        if (isLoginPage) {
+            login();
+        }
+        else {
+            register();
+        }
+
+        //setUser({username:usernameValue,user_id:call.user_id});
         //navigate("/Room", { state: { user: usernameValue } });
         //window.location.reload();
 
 
     }
+    const login = () =>{
+        io.emit("login", { username: usernameValue, password: PasswordValue });
+
+    }
     const register = () => {
+
+        if (PasswordValue.length < 8) {
+            enqueueSnackbar("Password must be at least 8 characters", { variant: 'error' })
+            return;
+        }
+
         io.emit("register", { username: usernameValue, password: PasswordValue });
     }
-
-
 
     io.off('login').on('login', (call) => {
         console.log(call);
         if (call.success) {
-            navigate("/Room/"+getRandomName(), { state: { user: usernameValue, user_id: call.user_id } });
+            setUser({ username: usernameValue, user_id: call.user_id });
+            navigate("/Room/" + getRandomName());
             enqueueSnackbar("Welcome " + call.username, { variant: 'success' })
 
             //window.location.reload();
@@ -53,13 +77,22 @@ function Login(props) {
         }
     });
 
-
     const flexBox = {
+        transition: "0.5s",
         display: "flex",
         flexFlow: "column",
-        padding: "5px",
+        padding: "50px",
+        paddingTop: "20px",
+        paddingBottom: "20px",
+        borderRadius: "25px",
         position: 'absolute', left: '50%', top: '45%',
         transform: 'translate(-50%, -45%)',
+        //opacity
+        backgroundColor: theme.palette.primary.main + "50",
+
+
+        // add background blur  
+        backdropFilter: "blur(5px)",
 
     }
     const background = {
@@ -71,44 +104,130 @@ function Login(props) {
         height: "100vh",
     }
 
+    const selectedButton = {
+        transition: "0.5s",
+        backgroundColor: theme.palette.primary.dark.replace("rgb", "rgba").replace(")", ",0.5)"),
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center",
+    }
+    const unselectedButton = {
+        transition: "0.5s",
+        backgroundColor: theme.palette.primary.main + "50",
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center",
+    }
+
     return (
         <div style={background}>
-            <Container style={flexBox} maxWidth="md">
-                <TextField
-                    InputProps={{
-                        style: {
-                            color: "white"
-                        }
-                    }} InputLabelProps={{
-                        style: {
+            <Container maxWidth="md">
+                <Paper
+                    elevation={5}
+                    style={flexBox} square >
+                    <Typography style={
+                        {
                             color: "white",
+                            marginBottom: "5px",
+                            fontWeight: "bold",
+                            fontSize: "30px",
+                            textAlign: "center",
+                            marginBottom: "10px"
                         }
-                    }} onKeyDown={(evt) => { if (evt.key === 'Enter') { login() } }}
-                    onChange={evt => updateUsername(evt)}
-                    id="outlined-basic"
-                    label="User"
-                    variant="filled" />
-                <TextField
-                    type="password"
-                    InputProps={{
-                        style: {
-                            color: "white"
-                        }
-                    }} InputLabelProps={{
+                    } fontWeight={"bold"}>{isLoginPage?"Login":"Register"}</Typography>
+                    
+                    <TextField
+                        style={{ marginBottom: "5px" }}
+                        InputProps={{
+                            style: {
+                                color: "white"
+                            }
+                        }} InputLabelProps={{
+                            style: {
+                                color: "white",
+                            }
+                        }} onKeyDown={(evt) => { if (evt.key === 'Enter') { login() } }}
+                        onChange={evt => updateUsername(evt)}
+                        id="outlined-basic"
+                        label="User"
+                        variant="filled" />
+                    <TextField
+                        style={{ marginBottom: "5px" }}
 
-                        style: {
-                            color: "white",
-                        }
+                        type="password"
+                        InputProps={{
+                            style: {
+                                color: "white"
+                            }
+                        }} InputLabelProps={{
+
+                            style: {
+                                color: "white",
+                            }
+                        }}
+                        onKeyDown={evt => { if (evt.key === 'Enter') { loginOrRegister() } }}
+                        onChange={evt => updatePassword(evt)}
+                        id="outlined-basic"
+                        label="Password"
+                        variant="filled" />
+                     <TextField
+                        type="password"
+                        style = {{
+                            opacity: isLoginPage ? "0" : "1",
+                            maxHeight: isLoginPage ? "0px" : "100px",
+                            
+                            transition: "0.5s",
+                            marginBottom: "5px",
+
+                         }}
+                        InputProps={{
+                            style: {
+                                color: "white"
+                            }
+                        }} InputLabelProps={{
+                            style: {
+                                color: "white",
+                            }
+                        }}
+                        onKeyDown={evt => { if (evt.key === 'Enter') { register() } }}
+                        onChange={evt => updatePassword(evt)}
+                        id="outlined-basic"
+                        label="Confirm Password"
+                        variant="filled" />
+
+                    <Button style={{
+                        marginTop: "5px",
+                        backgroundColor: theme.palette.secondary.main,
                     }}
-                    onKeyDown={evt => { if (evt.key === 'Enter') { login() } }}
-                    onChange={evt => updatePassword(evt)}
-                    id="outlined-basic"
-                    label="Password"
-                    variant="filled" />
-                <Button style={{ marginTop: "5px" }} onClick={login} variant='contained'>Login</Button>
-                <Button style={{ marginTop: "5px" }} onClick={register} variant='contained'>Register</Button>
+                        onClick={loginOrRegister} variant='contained'>{isLoginPage ? "Login" : "Register"}</Button>
+                    <ToggleButtonGroup
+                        color="primary"
+
+                        value={isLoginPage}
+                        onChange={(e, val) => {
+                            setIsLoginPage(val);
+                        }}
+                        exclusive
+                        aria-label="text alignment"
+                        style={{
+                            
+                            marginTop: "20px",
+                            alignSelf: "center",
+                            backgroundColor: theme.palette.primary.main + "50",
+                        }}
+                    >
+                        <ToggleButton value={true}
+                            style={isLoginPage ? selectedButton : unselectedButton}
+                        >
+                            Login</ToggleButton>
+                        <ToggleButton 
+                        style={isLoginPage ? unselectedButton : selectedButton}
+                        value={false} >Register</ToggleButton>
+                    </ToggleButtonGroup>
+                </Paper>
 
             </Container>
+
         </div>
     );
 
@@ -116,13 +235,16 @@ function Login(props) {
 
         let hexString = v4();
         console.log("hex:   ", hexString);
-        
+
         // remove decoration
         hexString = hexString.replace(/-/g, "");
-        
+
         // convert to base64
         let base64String = Buffer.from(hexString, "hex").toString("base64").replace(/[^a-zA-Z ]/g, "");
-        
+        if (base64String == null) {
+            return getRandomName();
+        }
+
         return base64String;
     }
 
