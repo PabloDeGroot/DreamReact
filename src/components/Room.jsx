@@ -35,12 +35,12 @@ function Room(props) {
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+    const [dataConnections, setDataConnections] = React.useState([]);
 
 
     const forceUpdate = () => {
 
 
-        console.log(user);
         setValue(value => value + 1); // update state to force render
         // An function that increment 👆🏻 the previous state like here 
         // is better than directly setting `value + 1`
@@ -87,6 +87,26 @@ function Room(props) {
         }
 
     }, [])
+    
+
+    peer.off('connection').on('connection', (conn) => {
+        setInterval(() => {
+            var data = Math.random()*100;
+            //console.log(data);
+            //conn.send(data);
+        }, 100);
+        let auxDreams = dreams;
+
+        let stream = dreams[conn.peer]?.stream;
+        auxDreams[conn.peer] = {
+            username: conn.metadata.username,
+            stream: stream,
+            data: conn
+        }
+        setDreams(auxDreams);
+        forceUpdate();
+
+    });
 
     peer.off('call').on('call', (call) => {
         call.answer();
@@ -97,24 +117,21 @@ function Room(props) {
         })
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
+
             
             console.log(call.peer);
             var auxDreams = dreams;
+            let data = auxDreams[call.peer]?.data;
             auxDreams[call.peer] = {
                 username: call.metadata.username,
-                stream: stream
+                stream: stream,
+                data: data
             }
-            setInterval(()=>{
-                call.peerConnection.getStats(test).then((stats)=>{
-                    stats.forEach((stat)=>{
-                        console.log(stat);
-                    })
-                })
-            },10000)
 
             setDreams(auxDreams);
             forceUpdate();
         });
+        
 
         call.on("error", (e) => {
             console(e);
@@ -123,6 +140,9 @@ function Room(props) {
             setDreams(auxDreams);
         })
     })
+    
+    
+    
     socket.off("welcome").on("welcome", (user) => {
         enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
 
@@ -172,6 +192,9 @@ function Room(props) {
     const startScreenCap = () => {
 
 
+
+     
+
         var video_constraints = {
 
             optional: []
@@ -184,6 +207,13 @@ function Room(props) {
 
 
                 users.map((user) => {
+                    var e = peer.connect(user.id, { metadata: { username: user.username } });
+                    e.addListener("open", () => {
+                        e.send("hello");
+                    })
+                    e.addListener("data", (data) => {
+                        console.log(data);
+                    })
                     var spectator = peer.call(user.id, stream, { metadata: { username: user.username } });
 
                     if (spectators) {
@@ -213,7 +243,7 @@ function Room(props) {
             stream.getVideoTracks().forEach((track) => { track.stop() })
         }
         setLocalStream(null);
-        socket.emit("stop");
+        socket.emit("stop",{room:room});
         spectators.forEach((call) => { call.close() })
         setSpectators.apply([]);
 
@@ -234,7 +264,7 @@ function Room(props) {
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
                     {Object.keys(dreams).map((key) => {
-                        return <Dream stream={dreams[key].stream} username={dreams[key].username}></Dream>
+                        return <Dream stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
                     })}
                 </div>
                 {isScreenCapOn &&
@@ -307,7 +337,7 @@ function Dream(props) {
 
     const doubleClickHandler = (e) => {
 
-        var target = e.target;
+        var target = e.target.parentElement.parentElement.parentElement;
         if (target.classList.contains("☁")) {
 
             var parent = target.parentElement;
@@ -323,9 +353,35 @@ function Dream(props) {
 
         }
     }
+    const handleMouseMove = (e) => {
+        if (!props.data){
+            return;
+        }
+        var rect = e.target.getBoundingClientRect();
+        var x = e.clientX - rect.left; //x position within the element.
+        var y = e.clientY - rect.top;  //y position within the element.
+        //get element height and width
+        var maxX = e.target.clientWidth;
+        var maxY = e.target.clientHeight;
+        //normalize x and y
+        x = x / maxX;
+        y = y / maxY;
+        
+
+        
+        props.data.send({x:x,y:y});
+        
+        
+        console.log(e.clientX - rect.left, e.clientY - rect.top);
+    }
+
+    //onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} 
     return (
         <>
-            <div onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} className="☁" >
+        
+            <div 
+
+            className="☁" >
                 <Collapse style={{ zIndex: 100, position: "absolute", width: "100%" }} in={hover}>
                     <Paper square style={{ opacity: 0.5, backdropFilter: "blur(50px)" }}  >
                         <Box justifyContent={"center"} textAlign={"center"}><Typography fontWeight={"bold"}>{props.username}</Typography></Box>
@@ -336,7 +392,14 @@ function Dream(props) {
                         <CircularProgress />
                     </Box>}
 
-                <div className="streamContainer" >
+                <div 
+onDoubleClick={
+    doubleClickHandler
+}
+                onMouseMove={
+                    handleMouseMove
+                }
+                  className="streamContainer" >
 
 
                     <ReactPlayer config={{

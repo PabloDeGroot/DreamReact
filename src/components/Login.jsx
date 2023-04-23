@@ -76,6 +76,17 @@ function Login(props) {
             enqueueSnackbar("Login Failed", { variant: 'error' })
         }
     });
+    io.off('register').on('register', (call) => {
+        console.log(call);
+        if (call.success) {
+            setIsLoginPage(true);
+            //window.location.reload();
+        }
+        else {
+            enqueueSnackbar("Register Failed", { variant: 'error' })
+        }
+    });
+
 
     const flexBox = {
         transition: "0.5s",
@@ -85,8 +96,8 @@ function Login(props) {
         paddingTop: "20px",
         paddingBottom: "20px",
         borderRadius: "25px",
-        position: 'absolute', left: '50%', top: '45%',
-        transform: 'translate(-50%, -45%)',
+        position: 'absolute', left: '50%', top: '50%',
+        transform: 'translate(-50%, -50%)',
         //opacity
         backgroundColor: theme.palette.primary.main + "50",
 
@@ -128,7 +139,6 @@ function Login(props) {
                     <Typography style={
                         {
                             color: "white",
-                            marginBottom: "5px",
                             fontWeight: "bold",
                             fontSize: "30px",
                             textAlign: "center",

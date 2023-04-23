@@ -63,10 +63,11 @@
 }
 
 .☁.maximized {
-  display: block;
+  display: flex;
   max-width: none;
   max-height: none;
-  width: 90%;
+  justify-content: center;
+  width: 95%;
   height: 95%;
   margin:0;
   position: absolute;
@@ -88,10 +89,6 @@
   justify-content: center;
   align-items: center;
   position: relative;
-  height: 100%;
-  pointer-events: none;
-  width: 100%;
-
 }
 
 .callOptions {
