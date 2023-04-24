@@ -1,0 +1,59 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Transparent Window</title>
+  <style>
+    body {
+      background-color: transparent;
+      -webkit-app-region: drag;
+      overflow: hidden;
+    }
+
+    .draggable-area {
+      width: 300px;
+      height: 300px;
+      background-color: blue;
+      color: white;
+      -webkit-app-region: drag;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+
+  </div>
+  <div style="position: absolute; background-color: red; width: 100px; height: 100px; top: 0; left: 0; z-index: 999
+    ; -webkit-app-region: no-drag; pointer-events: none;" id="followCursor">
+
+  </div>
+
+  <script>
+
+
+
+
+
+
+    var app = require('electron').remote;
+
+    // Close app 
+
+
+    // Follow the cursor
+    setInterval(() => {
+      var cursor = app.screen.getCursorScreenPoint();
+      var win = app.BrowserWindow.getFocusedWindow();
+      var pos = win.getPosition();
+      var size = win.getSize();
+      var x = cursor.x - pos[0];
+      var y = cursor.y - pos[1];
+      var followCursor = document.getElementById("followCursor");
+      followCursor.style.left = x-50 + "px";
+      followCursor.style.top = y - 50+"px";
+    }, 10);
+  </script>
+</body>
+
+</html>
