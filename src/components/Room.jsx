@@ -1,4 +1,4 @@
-import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress, Snackbar, Alert, Paper, Typography, Collapse, useTheme } from '@mui/material';
+import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress, Snackbar, Alert, Paper, Typography, Collapse } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
@@ -7,7 +7,7 @@ import Peer from 'peerjs'; // usado para WebRTC
 import useLocalStorage from '../Hooks/MyHooks';
 
 import { useSnackbar } from 'notistack';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate , useParams} from 'react-router-dom';
 import { io } from 'socket.io-client'; //usado para administrar usuarios
 
 
@@ -18,12 +18,10 @@ const peer = new Peer({
 
 function Room(props) {
     let navigate = useNavigate();
-    const { room } = useParams()
+    const {room} =  useParams()
 
-    const theme = useTheme();
 
     const socket = props.socket;
-    const [logoutHover, setLogoutHover] = React.useState(false);
     const [dreams, setDreams] = React.useState({});
     const [isOptionsExpanded, expandOptions] = React.useState(true);
     const [isMicOn, toggleMic] = React.useState(true);
@@ -33,7 +31,7 @@ function Room(props) {
     const [users, setUsers] = React.useState([]);
     const { state } = useLocation();
     const [user, setUser] = useLocalStorage('user', null);
-    const [userid, setUserID] = React.useState(null);
+    const [userid,setUserID] = React.useState(null);
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -50,7 +48,7 @@ function Room(props) {
 
 
 
-
+    
 
     //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO 
     //TODO AL MANDAR LOS USUARIOS AL SERVIDOR LA ID NO COINCIDE?
@@ -68,11 +66,11 @@ function Room(props) {
 
             if (peer.open) {
 
-                socket.emit("hello", { id: peer.id + "", username: user.username, room: room });
+                socket.emit("hello", { id: peer.id+"", username: user.username,room:room });
             } else {
 
                 peer.on("open", (id) => {
-                    socket.emit("hello", { id: id + "", username: user.username, room: room });
+                    socket.emit("hello", { id: id+"", username: user.username,room:room });
                 });
             }
         });
@@ -89,11 +87,11 @@ function Room(props) {
         }
 
     }, [])
-
+    
 
     peer.off('connection').on('connection', (conn) => {
         setInterval(() => {
-            var data = Math.random() * 100;
+            var data = Math.random()*100;
             //console.log(data);
             //conn.send(data);
         }, 100);
@@ -120,7 +118,7 @@ function Room(props) {
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
 
-
+            
             console.log(call.peer);
             var auxDreams = dreams;
             let data = auxDreams[call.peer]?.data;
@@ -133,7 +131,7 @@ function Room(props) {
             setDreams(auxDreams);
             forceUpdate();
         });
-
+        
 
         call.on("error", (e) => {
             console(e);
@@ -142,9 +140,9 @@ function Room(props) {
             setDreams(auxDreams);
         })
     })
-
-
-
+    
+    
+    
     socket.off("welcome").on("welcome", (user) => {
         enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
 
@@ -195,7 +193,7 @@ function Room(props) {
 
 
 
-
+     
 
         var video_constraints = {
 
@@ -245,7 +243,7 @@ function Room(props) {
             stream.getVideoTracks().forEach((track) => { track.stop() })
         }
         setLocalStream(null);
-        socket.emit("stop", { room: room });
+        socket.emit("stop",{room:room});
         spectators.forEach((call) => { call.close() })
         setSpectators.apply([]);
 
@@ -260,45 +258,7 @@ function Room(props) {
             stopScreenCap();
         }
 
-
-
-
-
     }
-    const logOut = () => {
-        localStorage.removeItem("user");
-
-        navigate("/");
-    }
-    const logOutHover = () => {
-        setLogoutHover(true);
-    }
-    const logOutHoverOut = () => {
-        setLogoutHover(false);
-    }
-
-
-    const logoutStyle = {
-        position: "absolute",
-        bottom: "0",
-        right: "0",
-        margin: "1rem",
-        cursor: "pointer",
-        backgroundColor: theme.palette.secondary.light,
-        opacity: "0.1",
-        borderRadius: "20%",
-        padding: "0.5rem",
-        fontSize: "1.5rem",
-        boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-        transition: "all 0.2s ease-in-out",
-        color: theme.palette.secondary.contrastText,
-    }
-    const logoutHoverStyle = {
-        opacity: "1",
-        backgroundColor: theme.palette.error.main,
-    }
-
-
     return (
         <>
             <div className="roomBack" >
@@ -321,7 +281,7 @@ function Room(props) {
                     <Slide direction='up' in={isOptionsExpanded}>
                         <Box>
                             <Fab onClick={() => { toggleMic(!isMicOn) }} color={isMicOn ? "primary" : "error"} >
-                                <Icon style={{ color: isMicOn ? theme.palette.primary.contrastText : theme.palette.error.contrastText }}>
+                                <Icon>
                                     {isMicOn ? "mic" : "mic_off"}
                                 </Icon>
                             </Fab>
@@ -330,7 +290,7 @@ function Room(props) {
                     <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
                             <Fab onClick={screenCapHandler} color={isScreenCapOn ? "secondary" : "primary"}>
-                                <Icon style={{ color: isScreenCapOn ? theme.palette.secondary.contrastText : theme.palette.primary.contrastText }}>
+                                <Icon >
                                     desktop_windows
                                 </Icon>
                             </Fab>
@@ -339,36 +299,23 @@ function Room(props) {
                     <Slide direction='up' timeout={{ enter: 1000, exit: 1000 }} in={isOptionsExpanded}>
                         <Box>
                             <Fab onClick={() => { toggleAudio(!isAudioOn) }} color={isAudioOn ? "primary" : "error"}>
-                                <Icon style={{ color: isAudioOn ? theme.palette.primary.contrastText : theme.palette.error.contrastText }}>
+                                <Icon >
                                     headphones
                                 </Icon>
                             </Fab>
                         </Box>
                     </Slide>
                 </Box>
-                {user && <UserList user={user} users={users} />}
-
-                <IconButton
-                    className="logout" onClick={logOut}
-                    onMouseEnter={logOutHover}
-                    onMouseLeave={logOutHoverOut}
-
-                    style={logoutHover ? { ...logoutStyle, ...logoutHoverStyle } : logoutStyle}
-                ><Icon>logout</Icon></IconButton>
-
-
-
-
-
+                {user &&<UserList user={user} users={users}/>}
+                
             </div>
-
+            
         </>
     );
 
 }
 export default Room;
 function Dream(props) {
-    const theme = useTheme();
     const [hover, setHover] = React.useState(false);
     const [volume, setVolume] = React.useState(1);
     const [play, setPlay] = React.useState(false);
@@ -407,7 +354,7 @@ function Dream(props) {
         }
     }
     const handleMouseMove = (e) => {
-        if (!props.data) {
+        if (!props.data){
             return;
         }
         var rect = e.target.getBoundingClientRect();
@@ -419,26 +366,22 @@ function Dream(props) {
         //normalize x and y
         x = x / maxX;
         y = y / maxY;
+        
 
-
-
-        props.data.send({ x: x, y: y });
-
-
+        
+        props.data.send({x:x,y:y});
+        
+        
         console.log(e.clientX - rect.left, e.clientY - rect.top);
     }
-
 
     //onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} 
     return (
         <>
+        
+            <div 
 
-            <div
-                style={{
-                    backgroundColor: theme.palette.primary.main + "60",
-                }}
-
-                className="☁" >
+            className="☁" >
                 <Collapse style={{ zIndex: 100, position: "absolute", width: "100%" }} in={hover}>
                     <Paper square style={{ opacity: 0.5, backdropFilter: "blur(50px)" }}  >
                         <Box justifyContent={"center"} textAlign={"center"}><Typography fontWeight={"bold"}>{props.username}</Typography></Box>
@@ -446,22 +389,22 @@ function Dream(props) {
                 </Collapse>
                 {!play &&
                     <Box className='loading'>
-                        <CircularProgress color='secondary' />
+                        <CircularProgress />
                     </Box>}
 
-                <div
-                    onDoubleClick={
-                        doubleClickHandler
-                    }
-                    onMouseMove={
-                        handleMouseMove
-                    }
-                    className="streamContainer" >
+                <div 
+onDoubleClick={
+    doubleClickHandler
+}
+                onMouseMove={
+                    handleMouseMove
+                }
+                  className="streamContainer" >
 
 
                     <ReactPlayer config={{
-                        file: {
-                            attributes: { 'preload': 'none', 'muted': true }
+                        file:{
+                            attributes:{'preload':'none','muted':true}
                         }
                     }} muted={true} volume={0} onPlay={() => { setPlay(true); }
 
@@ -492,14 +435,14 @@ function LocalDream(props) {
             <div onMouseEnter={() => { setHover(true) }} onMouseLeave={() => { setHover(false) }} className="🏠☁" >
                 <div className="streamContainer" >
                     <ReactPlayer playing volume={0} muted width='99%' height="100%" url={props.stream}
-                        config={{
-                            file: {
-                                attributes: {
-
-                                }
-                            }
-                        }}
-
+                    config={{
+                        file: {
+                          attributes:{
+                            
+                          }
+                        }
+                      }}
+                    
                     ></ReactPlayer>
                 </div>
 
@@ -511,98 +454,27 @@ function LocalDream(props) {
 }
 
 function UserList(props) {
-
-
-
-    const theme = useTheme();
-    var isRoomOwner = props.user.id == props.roomOwner || true;
-    var users = []
-    const [open, setOpen] = React.useState(false);
-    //renderUsers(props.users);
-
-    //users = users.concat(renderUsers(props.users))
+    const users = renderUsers(props.users);
     console.log(props)
-    for (var i = 0; i < props.users.length; i++) {
-
-        users.push(<div className="username"><p>{props.users[i].username}</p>{isRoomOwner && <UserlistAdminOptions />}</div>)
-    }
-    users.push(<div className="username"><p>{props.user.username}</p>{isRoomOwner && <UserlistAdminOptions />}</div>)
+    users.push(<div>{props.user.username}</div>)
     return (
 
-        //  position:absolute;
+        <div className='userList ☁'>
 
-        <div
-            style={{
-                
-                backgroundColor: theme.palette.primary.light.replace(")", ",0.3)"),
-                borderRadius: open ? "20px" : "20%",
-
-            }}
-            className='userList ☁'>
-<div
-            onClick={() => { setOpen(!open) }}
-            className='UsersTitle'
-            style={{
-                backgroundColor: theme.palette.primary.light.replace(")", ",0.3)"),
-            }}
-        >
-            <h3
-                style={{
-                    maxWidth: open ? "100px" : "0px",
-                    padding: open ? "10px" : "0px",
-                    opacity: open ? 1 : 0,
-
-                }}
-            >Users</h3>
-            <Icon
-                style={{
-                    padding: '10px',
-                }}
-            >person</Icon>
-        </div>
-
-            <div
-                style={{
-                    maxWidth: open ? "400px" : "0px",
-                    maxHeight: open ? "50px" : "0px",
-                    opacity: open ? 1 : 1,
-                    overflow: "hidden",
-                    transition: "max-height 3s ease-in-out",
+            {users}
 
 
-                }}
-            >
-                {users}
-
-            </div>
-
-        </div>
-    )
-
-}
-function UserlistAdminOptions(props) {
-
-    return (
-        <div className="adminOptions">
-            <IconButton onClick={props.kickUser}><Icon>delete</Icon></IconButton>
-            <IconButton onClick={props.banUser}><Icon>block</Icon></IconButton>
         </div>
     )
 
 }
 function renderUsers(users) {
     console.log(users);
-    var u = [];
-
     if (users.length > 0) {
-        users.forEach((user, index) => {
-            u.push(<p>{user.username}</p>)
+        return users.map((user, index) => {
+            console.log("AAAAA")
+            return <div>{user.username}</div>
         })
-        return u;
-        //return users.map((user, index) => {
-        //    console.log("AAAAA")
-        //    return <div>{user.username}</div>
-        //})
     } else {
         return [];
     }

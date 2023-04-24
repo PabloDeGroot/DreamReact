@@ -55,7 +55,7 @@ function Login(props) {
     }
     const register = () => {
 
-        if (false && PasswordValue.length < 8 ) {
+        if (PasswordValue.length < 8) {
             enqueueSnackbar("Password must be at least 8 characters", { variant: 'error' })
             return;
         }
@@ -118,14 +118,14 @@ function Login(props) {
     const selectedButton = {
         transition: "0.5s",
         backgroundColor: theme.palette.primary.dark.replace("rgb", "rgba").replace(")", ",0.5)"),
-        color: theme.palette.primary.contrastText,
+        color: "white",
         fontWeight: "bold",
         textAlign: "center",
     }
     const unselectedButton = {
         transition: "0.5s",
         backgroundColor: theme.palette.primary.main + "50",
-        color: theme.palette.primary.contrastText,
+        color: "white",
         fontWeight: "bold",
         textAlign: "center",
     }
@@ -138,7 +138,7 @@ function Login(props) {
                     style={flexBox} square >
                     <Typography style={
                         {
-                            color:theme.palette.primary.contrastText,
+                            color: "white",
                             fontWeight: "bold",
                             fontSize: "30px",
                             textAlign: "center",
@@ -208,7 +208,6 @@ function Login(props) {
                     <Button style={{
                         marginTop: "5px",
                         backgroundColor: theme.palette.secondary.main,
-                        color:theme.palette.secondary.contrastText,
                     }}
                         onClick={loginOrRegister} variant='contained'>{isLoginPage ? "Login" : "Register"}</Button>
                     <ToggleButtonGroup
