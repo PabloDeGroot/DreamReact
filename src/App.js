@@ -34,10 +34,9 @@ const randomPrimaryColor = () => {
     '#ffc107',
     '#ff9800',
     '#e91e63',
-    '#9c27b0',
     '#ff4081',
     '#d500f9',
-
+    '#9c27b0'
 
   ];
   return colors[Math.floor(Math.random() * colors.length)];
@@ -50,11 +49,10 @@ const randomSecondaryColor = () => {
     '#F2994A',
     '#9744A3',
     '#6ECFB9',
-    '#a787ad',
     '#dcb761',
     '#CB6284',
     '#F2B705',
-    
+    '#d500f9'    
 
 
   ];
