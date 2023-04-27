@@ -12,6 +12,8 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.3.5",
     "buffer": "^6.0.3",
+    "concurrent": "^0.3.2",
+    "concurrently": "^8.0.1",
     "notistack": "^2.0.5",
     "peerjs": "^1.4.7",
     "react": "^18.2.0",
@@ -24,7 +26,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently \"npm run server\" \"npm run react\"",
+    "server": "node socket/src/server.js",
+    "react": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
