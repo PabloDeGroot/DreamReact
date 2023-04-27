@@ -1,7 +1,8 @@
 import { createServer } from "http"
 import { Server } from "socket.io"
 import * as csv from "csv"
-let https = await import('node:http');
+//node:http
+import * as https from 'https';
 import * as fs from 'fs';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
