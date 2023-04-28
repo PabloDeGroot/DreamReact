@@ -6,9 +6,18 @@ import * as https from 'https';
 import * as fs from 'fs';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-const httpServer = https.createServer(
 
-)
+var cert = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/fullchain.pem');
+var key = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/privkey.pem');
+
+
+const httpServer = https.createServer(
+    {
+        key: key,
+        cert: cert
+    }
+);
+
 const login = async (username, password) => {
     /*const getFileContents = async (filepath) => {
   const data = [];
@@ -196,6 +205,7 @@ io.on("connection", (socket) => {
         }
 });
 });
+
 
 httpServer.listen(2000);
 console.log("starting server on port 2000")
