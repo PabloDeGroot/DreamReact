@@ -127,11 +127,12 @@ const register = async (username, password) => {
 
 const io = new Server(httpServer, {
     //path: "/socket/"}
+    //alow cors
     cors: {
-        origin: "https://duckhub.dev",
+        origin: "*", //or "https://duckhub.dev"
         methods: ["GET", "POST"]
     }
-    
+
 });
 var rooms = {}
 var globalUsers = {}
