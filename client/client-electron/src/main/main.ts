@@ -14,6 +14,17 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { spawn } from 'child_process';
+
+//peerjs
+import Peer from 'peerjs'; // usado para WebRTC
+
+const peer = new Peer();
+peer.on('open', function (id) {
+  console.log('My peer ID is: ' + id);
+});
+
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
 //import ffmpeg from 'ffmpeg-static';
 
@@ -25,20 +36,16 @@ class AppUpdater {
   }
 }
 
+
+
 let mainWindow: BrowserWindow | null = null;
+const process2 = spawn(
+  ffmpegPath,
+  ["-probesize", "10M", "-f", "gdigrab", "-framerate", "60", "-i", "desktop", "-f", "flv", "-"],
+  { stdio: "pipe" }
+);
+const stream = process2.stdout;
 
-
-const { spawn } = require('child_process');
-const ffmpeg = require('ffmpeg-static');
-
-const ffmpegProcess = spawn(ffmpeg, [
-  '-i', 'pipe:0',
-  '-f', 's16le',
-  '-ar', '48000',
-  '-ac', '2',
-  'pipe:1'
-]);
-const stream = ffmpegProcess.stdout;
 
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -167,8 +174,8 @@ app
   .whenReady()
   .then(() => {
     createWindow();
-    console.log(stream);
 
+   
     //mainWindow?.webContents.send('sendStream', stream);
     //setInterval(() => {
     //  const mousePosition = screen.getCursorScreenPoint();

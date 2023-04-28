@@ -62,7 +62,7 @@ const randomSecondaryColor = () => {
 }
 
 
-const socket = io(":2000")
+const socket = io(":2000",{secure:true})
 const theme = createTheme({
   palette: {
     // create a palete with pastel colors
