@@ -62,7 +62,7 @@ const randomSecondaryColor = () => {
 }
 
 
-const socket = io("ws://duckhub.dev:2000",{secure:true, reconnection: true, rejectUnauthorized : false})
+const socket = io("wss://duckhub.dev:2000",{secure:true, reconnection: true, rejectUnauthorized : false})
 const theme = createTheme({
   palette: {
     // create a palete with pastel colors
