@@ -1,7 +1,9 @@
+import * as fs from 'fs';
+import * as https from 'https';
 var cert = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/fullchain.pem');
 var key = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/privkey.pem');
 
-import * as https from 'https';
+
 const httpServer = https.createServer(
     {
         key: key,
