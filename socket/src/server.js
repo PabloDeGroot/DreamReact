@@ -17,7 +17,7 @@ const httpServer = https.createServer(
         cert: cert
     }
 );
-
+console.log(process.cwd())
 const login = async (username, password) => {
     /*const getFileContents = async (filepath) => {
   const data = [];
