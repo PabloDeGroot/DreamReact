@@ -7,7 +7,7 @@ import Peer from 'peerjs'; // usado para WebRTC
 import useLocalStorage from '../Hooks/MyHooks';
 
 import { useSnackbar } from 'notistack';
-import { useLocation, useNavigate , useParams} from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client'; //usado para administrar usuarios
 
 
@@ -18,7 +18,7 @@ const peer = new Peer({
 
 function Room(props) {
     let navigate = useNavigate();
-    const {room} =  useParams()
+    const { room } = useParams()
 
 
     const socket = props.socket;
@@ -31,7 +31,7 @@ function Room(props) {
     const [users, setUsers] = React.useState([]);
     const { state } = useLocation();
     const [user, setUser] = useLocalStorage('user', null);
-    const [userid,setUserID] = React.useState(null);
+    const [userid, setUserID] = React.useState(null);
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
@@ -48,7 +48,7 @@ function Room(props) {
 
 
 
-    
+
 
     //TODO EL SERVER RECIVE UNDEFINED EN ALGUN LADO 
     //TODO AL MANDAR LOS USUARIOS AL SERVIDOR LA ID NO COINCIDE?
@@ -66,11 +66,11 @@ function Room(props) {
 
             if (peer.open) {
 
-                socket.emit("hello", { id: peer.id+"", username: user.username,room:room });
+                socket.emit("hello", { id: peer.id + "", username: user.username, room: room });
             } else {
 
                 peer.on("open", (id) => {
-                    socket.emit("hello", { id: id+"", username: user.username,room:room });
+                    socket.emit("hello", { id: id + "", username: user.username, room: room });
                 });
             }
         });
@@ -87,15 +87,16 @@ function Room(props) {
         }
 
     }, [])
-    
+
 
     peer.off('connection').on('connection', (conn) => {
         setInterval(() => {
-            var data = Math.random()*100;
+            var data = Math.random() * 100;
             //console.log(data);
             //conn.send(data);
         }, 100);
         let auxDreams = dreams;
+        console.log("AAAAA");
 
         let stream = dreams[conn.peer]?.stream;
         auxDreams[conn.peer] = {
@@ -115,11 +116,13 @@ function Room(props) {
 
             }
         })
+        console.log("AAAAA");
+        
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
 
-            
-            console.log(call.peer);
+
+            console.log("AAAAA");
             var auxDreams = dreams;
             let data = auxDreams[call.peer]?.data;
             auxDreams[call.peer] = {
@@ -128,10 +131,10 @@ function Room(props) {
                 data: data
             }
 
-            setDreams(auxDreams);
+            //setDreams(auxDreams);
             forceUpdate();
         });
-        
+
 
         call.on("error", (e) => {
             console(e);
@@ -140,12 +143,16 @@ function Room(props) {
             setDreams(auxDreams);
         })
     })
-    
-    
-    
-    socket.off("welcome").on("welcome", (user) => {
-        enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
 
+
+
+    socket.off("welcome").on("welcome", (user) => {
+        if (users.find(u => u.username == user.username)) {
+            return;
+        }
+    
+            enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
+        
         setUsers((prevUsers) => {
             prevUsers = prevUsers.filter(Boolean);// algunos ids son strings otros no por algun motivo
             return [
@@ -162,7 +169,7 @@ function Room(props) {
     socket.off("goodbye").on("goodbye", (id) => {
 
         var user = users.find(u => u.id == id);
-        console.log(user);
+      
         if (user) {
             enqueueSnackbar(user.username + " se a desconectado :c", { variant: 'error' });
             var auxUsers = users;
@@ -171,7 +178,7 @@ function Room(props) {
         }
         var auxDreams = dreams;
 
-        console.log(dreams)
+ 
         delete auxDreams[id];
 
         setDreams(auxDreams);
@@ -193,7 +200,7 @@ function Room(props) {
 
 
 
-     
+
 
         var video_constraints = {
 
@@ -243,7 +250,7 @@ function Room(props) {
             stream.getVideoTracks().forEach((track) => { track.stop() })
         }
         setLocalStream(null);
-        socket.emit("stop",{room:room});
+        socket.emit("stop", { room: room });
         spectators.forEach((call) => { call.close() })
         setSpectators.apply([]);
 
@@ -306,10 +313,10 @@ function Room(props) {
                         </Box>
                     </Slide>
                 </Box>
-                {user &&<UserList user={user} users={users}/>}
-                
+                {user && <UserList user={user} users={users} />}
+
             </div>
-            
+
         </>
     );
 
@@ -317,7 +324,7 @@ function Room(props) {
 export default Room;
 function Dream(props) {
     const [hover, setHover] = React.useState(false);
-    const [volume, setVolume] = React.useState(1);
+    const [volume, setVolume] = React.useState(0);
     const [play, setPlay] = React.useState(false);
     const [soundOn, setSoundOn] = React.useState(false);
     const [maximized, setMaximized] = React.useState(false);
@@ -354,7 +361,7 @@ function Dream(props) {
         }
     }
     const handleMouseMove = (e) => {
-        if (!props.data){
+        if (!props.data) {
             return;
         }
         var rect = e.target.getBoundingClientRect();
@@ -366,22 +373,22 @@ function Dream(props) {
         //normalize x and y
         x = x / maxX;
         y = y / maxY;
-        
 
-        
-        props.data.send({x:x,y:y});
-        
-        
-        console.log(e.clientX - rect.left, e.clientY - rect.top);
+
+
+        props.data.send({ x: x, y: y });
+
+
+
     }
 
     //onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} 
     return (
         <>
-        
-            <div 
 
-            className="☁" >
+            <div
+
+                className="☁" >
                 <Collapse style={{ zIndex: 100, position: "absolute", width: "100%" }} in={hover}>
                     <Paper square style={{ opacity: 0.5, backdropFilter: "blur(50px)" }}  >
                         <Box justifyContent={"center"} textAlign={"center"}><Typography fontWeight={"bold"}>{props.username}</Typography></Box>
@@ -392,21 +399,21 @@ function Dream(props) {
                         <CircularProgress />
                     </Box>}
 
-                <div 
-onDoubleClick={
-    doubleClickHandler
-}
-                onMouseMove={
-                    handleMouseMove
-                }
-                  className="streamContainer" >
+                <div
+                    onDoubleClick={
+                        doubleClickHandler
+                    }
+                    onMouseMove={
+                        handleMouseMove
+                    }
+                    className="streamContainer" >
 
 
                     <ReactPlayer config={{
-                        file:{
-                            attributes:{'preload':'none','muted':true}
+                        file: {
+                            attributes: { 'preload': 'none', 'muted': true }
                         }
-                    }} muted={true} volume={0} onPlay={() => { setPlay(true); }
+                    }} muted={!soundOn} volume={soundOn ? 100 : 0} onPlay={() => { setPlay(true); }
 
                     } onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
 
@@ -435,14 +442,14 @@ function LocalDream(props) {
             <div onMouseEnter={() => { setHover(true) }} onMouseLeave={() => { setHover(false) }} className="🏠☁" >
                 <div className="streamContainer" >
                     <ReactPlayer playing volume={0} muted width='99%' height="100%" url={props.stream}
-                    config={{
-                        file: {
-                          attributes:{
-                            
-                          }
-                        }
-                      }}
-                    
+                        config={{
+                            file: {
+                                attributes: {
+
+                                }
+                            }
+                        }}
+
                     ></ReactPlayer>
                 </div>
 
@@ -455,7 +462,7 @@ function LocalDream(props) {
 
 function UserList(props) {
     const users = renderUsers(props.users);
-    console.log(props)
+
     users.push(<div>{props.user.username}</div>)
     return (
 
@@ -469,10 +476,10 @@ function UserList(props) {
 
 }
 function renderUsers(users) {
-    console.log(users);
+
     if (users.length > 0) {
         return users.map((user, index) => {
-            console.log("AAAAA")
+         
             return <div>{user.username}</div>
         })
     } else {

@@ -54,15 +54,17 @@ const randomSecondaryColor = () => {
     '#dcb761',
     '#CB6284',
     '#F2B705',
-    
-
-
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
+const local = true;
+
+var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 
 
-const socket = io("wss://duckhub.dev:2000",{secure:true, reconnection: true, rejectUnauthorized : false})
+
+
+const socket = io(url,{secure:true, reconnection: true, rejectUnauthorized : false})
 const theme = createTheme({
   palette: {
     // create a palete with pastel colors

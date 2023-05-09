@@ -1,13 +1,13 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
-import { contextBridge, ipcRenderer, IpcRendererEvent, screen } from 'electron';
-
-export type Channels = 'sendStream';
+import { contextBridge, ipcRenderer, IpcRendererEvent  } from 'electron';
+const { join } = require("path");
+const { readFileSync } = require("fs");
+export type Channels = 'SET_SOURCE';
 
 const electronHandler = {
   screen: {
-    getMousePosition() {
-      
+    getMousePosition() {      
     },
   },
     
@@ -28,6 +28,7 @@ const electronHandler = {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
   },
+
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

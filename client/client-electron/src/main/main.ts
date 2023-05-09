@@ -9,22 +9,16 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain , screen} from 'electron';
+import { app, BrowserWindow, shell, ipcMain, screen } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { spawn } from 'child_process';
 
-//peerjs
-import Peer from 'peerjs'; // usado para WebRTC
 
-const peer = new Peer();
-peer.on('open', function (id) {
-  console.log('My peer ID is: ' + id);
-});
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+
 
 //import ffmpeg from 'ffmpeg-static';
 
@@ -36,15 +30,11 @@ class AppUpdater {
   }
 }
 
-
+console.log("test")
 
 let mainWindow: BrowserWindow | null = null;
-const process2 = spawn(
-  ffmpegPath,
-  ["-probesize", "10M", "-f", "gdigrab", "-framerate", "60", "-i", "desktop", "-f", "flv", "-"],
-  { stdio: "pipe" }
-);
-const stream = process2.stdout;
+
+const { desktopCapturer } = require('electron')
 
 
 
@@ -68,7 +58,7 @@ if (process.env.NODE_ENV === 'production') {
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (isDebug && false) {
+if (isDebug) {
   require('electron-debug')();
 }
 
@@ -118,12 +108,12 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-  mainWindow.setAlwaysOnTop(true);
+ /*mainWindow.setAlwaysOnTop(true);
   mainWindow.setIgnoreMouseEvents(true);
   mainWindow.setResizable(false);
   mainWindow.setFullScreen(true);
   mainWindow.setFullScreenable(false);
-  /*mainWindow.setKiosk(true);
+  mainWindow.setKiosk(true);
   mainWindow.setMenu(null);
   mainWindow.setMovable(false);
   mainWindow.setSkipTaskbar(true);
@@ -138,6 +128,22 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+
+    desktopCapturer.getSources({ types: [ 'screen'] }).then(async sources => {
+ 
+      for (const source of sources) {
+        console.log(source)
+   
+        if (source.id.split(":")[0] == "screen") {
+
+          mainWindow?.webContents.send('SET_SOURCE', source)
+       
+          return
+        }
+      }
+    })
+
+
   });
 
   mainWindow.on('closed', () => {
@@ -175,7 +181,7 @@ app
   .then(() => {
     createWindow();
 
-   
+
     //mainWindow?.webContents.send('sendStream', stream);
     //setInterval(() => {
     //  const mousePosition = screen.getCursorScreenPoint();
@@ -183,13 +189,24 @@ app
     //  mainWindow?.webContents.send('getMousePosition', mousePosition);
     //}, 10);
 
+    console.log("activate")
+
+    
+   
+
+
+
+
 
     app.on('activate', () => {
-
       
+
+
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
       if (mainWindow === null) createWindow();
+
+
     });
   })
   .catch(console.log);

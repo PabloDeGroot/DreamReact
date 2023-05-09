@@ -7,17 +7,26 @@ import * as fs from 'fs';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
+const local = true;
+
+var httpServer;
+
+
+if (!local) {
 var cert = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/fullchain.pem');
 var key = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/privkey.pem');
 
 
-const httpServer = https.createServer(
+ httpServer = https.createServer(
     {
         key: key,
         cert: cert
     }
-);
-console.log(process.cwd())
+);}
+else{
+     httpServer = createServer();
+}
+
 const login = async (username, password) => {
     /*const getFileContents = async (filepath) => {
   const data = [];
@@ -41,13 +50,13 @@ const login = async (username, password) => {
         password: 'password',
         user_id: 'user_id'
     }
-    
+
     let data = []
     let uuid = ""
     let success = false
     return new Promise(function (resolve, reject) {
         fs.createReadStream("users.csv")
-            .pipe(csv.parse({ headers: true , columns: true}))
+            .pipe(csv.parse({ headers: true, columns: true }))
             .on('error', error => reject(error))
             .on('data', row => data.push(row))
             .on('end', () => {
@@ -62,12 +71,12 @@ const login = async (username, password) => {
                     }
                 }
                 console.log(uuid)
-                resolve({uuid:uuid,username:username,success:success})
+                resolve({ uuid: uuid, username: username, success: success })
             });
     })
 }
 
-const userExists = (username) =>{
+const userExists = (username) => {
     let columns = {
         username: 'username',
         password: 'password',
@@ -76,7 +85,7 @@ const userExists = (username) =>{
     let data = []
     return new Promise(function (resolve, reject) {
         fs.createReadStream("users.csv")
-            .pipe(csv.parse({ headers: true , columns: true}))
+            .pipe(csv.parse({ headers: true, columns: true }))
             .on('error', error => reject(error))
             .on('data', row => data.push(row))
             .on('end', () => {
@@ -92,7 +101,7 @@ const userExists = (username) =>{
                 resolve(false)
             });
     })
-    
+
 }
 
 const register = async (username, password) => {
@@ -109,7 +118,7 @@ const register = async (username, password) => {
     }
     let data = []
     let pass = crypto.createHash('md5').update(password).digest("hex")
-    data.push([username, pass ,uuidv4()])
+    data.push([username, pass, uuidv4()])
     console.log(data)
     csv.stringify(data, { header: true, columns: columns }, (err, output) => {
         fs.appendFile("users.csv", output, (err) => {
@@ -122,7 +131,7 @@ const register = async (username, password) => {
         })
     })
 
-    
+
 }
 
 const io = new Server(httpServer, {
@@ -150,17 +159,22 @@ io.on("connection", (socket) => {
             users = rooms[data.room]
         }
 
-        rooms[data.room][socket.id] = {
-            username: data.username,
-            id: data.id
-        }
-        globalUsers[socket.id] = {
-            id: data.id,
-            room: data.room
-        }
+        if (data.client != "electron") {
+            rooms[data.room][socket.id] = {
+                username: data.username,
+                id: data.id
+            }
+            globalUsers[socket.id] = {
+                id: data.id,
+                room: data.room
+            }
 
+            socket.to(data.room).emit("welcome", rooms[data.room][socket.id])
+        }else{
+            console.log("electron")
+        }
         //console.log(users);
-        socket.to(data.room).emit("welcome", rooms[data.room][socket.id])
+
         socket.join(data.room)
         socket.emit("userlist", Object.values(users).filter((user) => user.id != data.id));
 
@@ -170,8 +184,8 @@ io.on("connection", (socket) => {
     })
     socket.on('disconnect', () => {
         console.log("disconnect");
-            let user = globalUsers[socket.id]    
-            console.log(rooms)
+        let user = globalUsers[socket.id]
+        console.log(rooms)
 
         if (user != undefined) {
             socket.to(user.room).emit("goodbye", user.id);
@@ -185,7 +199,7 @@ io.on("connection", (socket) => {
 
 
 
-    
+
     socket.on('login', async (data) => {
 
         var uuid = await login(data.username, data.password);
@@ -202,10 +216,10 @@ io.on("connection", (socket) => {
     socket.on('register', (data) => {
         if (register(data.username, data.password)) {
             socket.emit("register", true);
-        }else{
+        } else {
             socket.emit("register", false);
         }
-});
+    });
 });
 
 
