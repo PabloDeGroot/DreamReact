@@ -12,62 +12,16 @@ const local = true;
 
 var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 
-
-
-
-const socket = io(url,{secure:false, reconnection: true, rejectUnauthorized : false})
-
-
-
+const socket = io(url, { secure: false, reconnection: true, rejectUnauthorized: false })
 
 const username = "user";
 const room = "room";
 
-function handlePeerConnect(peer: Peer, stream: any) {
-  console.log("App.tsx: handlePeerConnect()");
-  socket.emit("hello", { id: peer.id + "", username: username, room: room, client: "electron" });
-  socket.on("userlist", (data: any) => {
 
-    data.forEach((user: any) => {
-      var e = peer.connect(user.id, { metadata: { username: user.username } });
-      e.on('open', async function () {
-        console.log(stream);
-
-
-        var spectator = peer.call(user.id, stream, { metadata: { username: user.username } });
-        spectator.on('stream', function (remoteStream: any) {
-          // Show stream in some video/canvas element.
-          console.log("App.tsx: spectator.on('stream')");
-
-        }
-        );
-      });
-    });
-  });
-}
-
-
-function handleStream(stream: any,peer:any,socket:any) {
-  console.log("App.tsx: handleStream()")
-  socket.on("connect", () => {
-    console.log("App.tsx: socket.on('connect')");
-    if (peer.open) {
-      handlePeerConnect(peer, stream);
-    } else {
-      peer.on('open', function (id:any ) {
-        console.log('My peer ID is: ' + id);
-        handlePeerConnect(peer, stream);
-
-      });
-    }
-  });
-}
-
-function handleError(e: any) {
-  console.log(e)
-}
 
 export default function App() {
+
+
 
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [stream, setStream] = useState(null as any);
@@ -78,9 +32,71 @@ export default function App() {
 
   useEffect(() => {
     const peer = new Peer({
-      debug:1,
+      debug: 1,
 
     });
+
+
+
+    var callPeer = (peer: Peer, peerid: string, stream: MediaStream) => {
+      console.log("App.tsx: Welcome");
+      var e = peer.connect(peerid, { metadata: { username: "electron" } });
+      e.on('open', async function () {
+
+
+        e.on('data',  (data:any)  => {
+          setMousePosition({ x: data.x  * screen.width  , y: data.y * screen.height})
+          console.log('Received', data);
+        });
+
+
+        var spectator = peer.call(peerid, stream, { metadata: { username: "electron" } });
+      });
+    }
+    var handlePeerConnect = (peer: Peer, stream: MediaStream) => {
+      console.log("App.tsx: handlePeerConnect()");
+      socket.emit("hello", { id: peer.id + "", username: username, room: room, client: "electron" });
+      socket.on("userlist", (data: any) => {
+        data.forEach((user: any) => {
+          callPeer(peer, user.id, stream);
+        });
+      });
+      socket.on("welcome", (data: any) => {
+        callPeer(peer, data.id, stream);
+      });
+    }
+
+    var handleSocket = (peer: any, stream: any) => {
+
+      if (peer.open) {
+        handlePeerConnect(peer, stream);
+      } else {
+        peer.on('open', function (id: any) {
+          console.log('My peer ID is: ' + id);
+          handlePeerConnect(peer, stream);
+
+        });
+      }
+    }
+
+    var handleStream = (stream: any, peer: any, socket: any) => {
+
+      if (socket.connected) {
+        handleSocket(peer, stream)
+      } else {
+        socket.on("connect", () => {
+          handleSocket(peer, stream)
+        })
+      }
+    }
+
+
+
+
+    function handleError(e: any) {
+      console.log(e)
+    }
+
 
 
 
@@ -92,15 +108,12 @@ export default function App() {
             mandatory: {
               chromeMediaSource: 'desktop',
               chromeMediaSourceId: data.id,
-              minWidth: 1280,
-              maxWidth: 1280,
-              minHeight: 720,
-              maxHeight: 720
+
             }
           }
         })
 
-        handleStream(streamaux,peer,socket)
+        handleStream(streamaux, peer, socket)
         setStream(streamaux)
       }
       catch (e) {
@@ -108,14 +121,7 @@ export default function App() {
       }
     })
 
-
-    
-
-
-
-
   }, []);
-
 
 
   return (
@@ -140,7 +146,6 @@ export default function App() {
         }}
       >
 
-
         <CursorIcon
 
           style={{
@@ -149,7 +154,6 @@ export default function App() {
 
           }}
           fill="cyan"
-
         />
 
         <p

@@ -117,7 +117,7 @@ function Room(props) {
             }
         })
         console.log("AAAAA");
-        
+
         call.on('stream', (stream) => {
             var test = stream.getVideoTracks()[0];
 
@@ -150,9 +150,9 @@ function Room(props) {
         if (users.find(u => u.username == user.username)) {
             return;
         }
-    
-            enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
-        
+
+        enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
+
         setUsers((prevUsers) => {
             prevUsers = prevUsers.filter(Boolean);// algunos ids son strings otros no por algun motivo
             return [
@@ -169,7 +169,7 @@ function Room(props) {
     socket.off("goodbye").on("goodbye", (id) => {
 
         var user = users.find(u => u.id == id);
-      
+
         if (user) {
             enqueueSnackbar(user.username + " se a desconectado :c", { variant: 'error' });
             var auxUsers = users;
@@ -178,7 +178,7 @@ function Room(props) {
         }
         var auxDreams = dreams;
 
- 
+
         delete auxDreams[id];
 
         setDreams(auxDreams);
@@ -376,10 +376,42 @@ function Dream(props) {
 
 
 
-        props.data.send({ x: x, y: y });
+        props.data.send({ type: "mousemove", pos: { x: x, y: y } });
+        
 
 
+    }
+    const handleMouseDown= (e) => {
+        if (!props.data) {
+            return;
+        }
+        var rect = e.target.getBoundingClientRect();
+        var x = e.clientX - rect.left; //x position within the element.
+        var y = e.clientY - rect.top;  //y position within the element.
+        //get element height and width
+        var maxX = e.target.clientWidth;
+        var maxY = e.target.clientHeight;
+        //normalize x and y
+        x = x / maxX;
+        y = y / maxY;        
+        props.data.send({ type: "mousedown", pos: { x: x, y: y } });
 
+    }
+    const handleMouseUp =  (e) => {
+        if (!props.data) {
+            return;
+        }
+        var rect = e.target.getBoundingClientRect();
+        var x = e.clientX - rect.left; //x position within the element.
+        var y = e.clientY - rect.top;  //y position within the element.
+        //get element height and width
+        var maxX = e.target.clientWidth;
+        var maxY = e.target.clientHeight;
+        //normalize x and y
+        x = x / maxX;
+        y = y / maxY;        
+        props.data.send({ type: "mouseup", pos: { x: x, y: y } });
+        
     }
 
     //onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} 
@@ -405,6 +437,12 @@ function Dream(props) {
                     }
                     onMouseMove={
                         handleMouseMove
+                    }
+                    onMouseDown={
+                        handleMouseDown
+                    }
+                    onMouseUp={
+                        handleMouseUp
                     }
                     className="streamContainer" >
 
@@ -479,7 +517,7 @@ function renderUsers(users) {
 
     if (users.length > 0) {
         return users.map((user, index) => {
-         
+
             return <div>{user.username}</div>
         })
     } else {
