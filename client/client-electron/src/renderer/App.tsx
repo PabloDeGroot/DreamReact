@@ -44,9 +44,18 @@ export default function App() {
       e.on('open', async function () {
 
 
-        e.on('data',  (data:any)  => {
-          setMousePosition({ x: data.x  * screen.width  , y: data.y * screen.height})
-          console.log('Received', data);
+        e.on('data', (data: any) => {
+          if (data.type == "mousemove") {
+
+
+
+            setMousePosition({ x: data.pos.x * screen.width, y: data.pos.y * screen.height })
+          }else if (data.type=="mousedown"){
+
+          }else if (data.type=="mouseup"){
+
+          }
+          console.log('Received', screen);
         });
 
 
