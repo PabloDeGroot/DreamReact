@@ -14,6 +14,7 @@
     "buffer": "^6.0.3",
     "concurrent": "^0.3.2",
     "concurrently": "^8.0.1",
+    "koffi": "^2.3.20",
     "notistack": "^2.0.5",
     "peerjs": "^1.4.7",
     "react": "^18.2.0",

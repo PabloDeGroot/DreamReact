@@ -9,6 +9,8 @@ import Peer from 'peerjs'; // usado para WebRTC
 import io from "socket.io-client";
 
 const local = true;
+//const lib = koffi.load("user32.dll")
+
 
 var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 

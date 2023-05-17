@@ -32,6 +32,46 @@ class AppUpdater {
 
 console.log("test")
 
+var koffi = require("koffi");
+const lib = koffi.load('user32.dll');
+
+var HWND_BROADCAST = 0xffff;
+const WM_RBUTTONDOWN = 0x0204;
+const WM_RBUTTONUP = 0x0205;
+const WM_LBUTTONDOWN = 0x0201;
+const WM_LBUTTONUP = 0x0202;
+//activate window
+const WM_ACTIVATE = 0x0006;
+
+
+//move mouse
+const WM_MOUSEMOVE = 0x0200;
+
+
+
+
+// Find functions
+const SendMessageA = lib.stdcall('SendMessageA', 'int', ['int', 'uint', 'int', 'int']);
+//Get foucs window
+const GetForegroundWindow = lib.stdcall('GetForegroundWindow', 'int', []);
+
+HWND_BROADCAST = GetForegroundWindow();
+
+
+
+let ret =  SendMessageA(HWND_BROADCAST, WM_LBUTTONDOWN, 444, 444);
+let ret2 =  SendMessageA(HWND_BROADCAST, WM_LBUTTONUP, 444, 444);
+//activate window
+let ret3 =  SendMessageA(HWND_BROADCAST, WM_ACTIVATE, 444, 444);
+
+
+
+console.log(ret);
+
+//let ret2 =  SendMessageA(HWND_BROADCAST, WM_LBUTTONUP, 10, 10);
+
+
+
 let mainWindow: BrowserWindow | null = null;
 
 const { desktopCapturer } = require('electron')
@@ -108,16 +148,16 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
- /*mainWindow.setAlwaysOnTop(true);
-  mainWindow.setIgnoreMouseEvents(true);
-  mainWindow.setResizable(false);
-  mainWindow.setFullScreen(true);
-  mainWindow.setFullScreenable(false);
-  mainWindow.setKiosk(true);
-  mainWindow.setMenu(null);
-  mainWindow.setMovable(false);
-  mainWindow.setSkipTaskbar(true);
-*/
+  /*mainWindow.setAlwaysOnTop(true);
+   mainWindow.setIgnoreMouseEvents(true);
+   mainWindow.setResizable(false);
+   mainWindow.setFullScreen(true);
+   mainWindow.setFullScreenable(false);
+   mainWindow.setKiosk(true);
+   mainWindow.setMenu(null);
+   mainWindow.setMovable(false);
+   mainWindow.setSkipTaskbar(true);
+ */
   mainWindow.setFocusable(false);
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -129,15 +169,15 @@ const createWindow = async () => {
       mainWindow.show();
     }
 
-    desktopCapturer.getSources({ types: [ 'screen'] }).then(async sources => {
- 
+    desktopCapturer.getSources({ types: ['screen'] }).then(async sources => {
+
       for (const source of sources) {
         console.log(source)
-   
+
         if (source.id.split(":")[0] == "screen") {
 
           mainWindow?.webContents.send('SET_SOURCE', source)
-       
+
           return
         }
       }
@@ -191,15 +231,15 @@ app
 
     console.log("activate")
 
-    
-   
+
+
 
 
 
 
 
     app.on('activate', () => {
-      
+
 
 
       // On macOS it's common to re-create a window in the app when the
