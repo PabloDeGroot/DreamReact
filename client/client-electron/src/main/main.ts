@@ -35,7 +35,7 @@ console.log("test")
 var koffi = require("koffi");
 const lib = koffi.load('user32.dll');
 
-var HWND_BROADCAST = 0xffff;
+var HWND = 0xffff;
 const WM_RBUTTONDOWN = 0x0204;
 const WM_RBUTTONUP = 0x0205;
 const WM_LBUTTONDOWN = 0x0201;
@@ -55,18 +55,29 @@ const SendMessageA = lib.stdcall('SendMessageA', 'int', ['int', 'uint', 'int', '
 //Get foucs window
 const GetForegroundWindow = lib.stdcall('GetForegroundWindow', 'int', []);
 
-HWND_BROADCAST = GetForegroundWindow();
+HWND = GetForegroundWindow();
+
+//let ret3 =  SendMessageA(HWND, WM_ACTIVATE, 444, 444);
+
+//let ret =  SendMessageA(HWND, WM_LBUTTONDOWN, 444, 444);
+
+//add top level function delay 
+
+//get HWND Title
+const GetWindowTextA = lib.stdcall('GetWindowTextA', 'int', ['int', 'string', 'int']);
 
 
 
-let ret =  SendMessageA(HWND_BROADCAST, WM_LBUTTONDOWN, 444, 444);
-let ret2 =  SendMessageA(HWND_BROADCAST, WM_LBUTTONUP, 444, 444);
+
+
+let ret2 =  SendMessageA(HWND, WM_MOUSEMOVE, 500, 500);
 //activate window
-let ret3 =  SendMessageA(HWND_BROADCAST, WM_ACTIVATE, 444, 444);
+
+const SetForegroundWindow = lib.stdcall('SetForegroundWindow', 'int', ['int']);
 
 
+console.log(HWND)
 
-console.log(ret);
 
 //let ret2 =  SendMessageA(HWND_BROADCAST, WM_LBUTTONUP, 10, 10);
 
