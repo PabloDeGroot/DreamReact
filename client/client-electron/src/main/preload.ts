@@ -7,8 +7,20 @@ export type Channels = 'SET_SOURCE';
 
 const electronHandler = {
   screen: {
-    getMousePosition() {      
+
+    //ipcMain.on('clickMouse', async (event, arg) => {
+    clickMouse(x: number, y: number) {
+      ipcRenderer.send('clickMouse', {x: x, y: y});     
     },
+    //ipcMain.on('keyDown', async (event, arg) => {
+    keyDown(key: string) {
+      ipcRenderer.send('keyDown', {key: key});     
+    },
+    //ipcMain.on('keyUp', async (event, arg) => {
+    keyUp(key: string) {
+      ipcRenderer.send('keyUp', {key: key});     
+    }
+    
   },
     
   ipcRenderer: {

@@ -49,13 +49,15 @@ export default function App() {
         e.on('data', (data: any) => {
           if (data.type == "mousemove") {
 
-
-
             setMousePosition({ x: data.pos.x * screen.width, y: data.pos.y * screen.height })
           }else if (data.type=="mousedown"){
 
           }else if (data.type=="mouseup"){
-
+            window.electron.screen.clickMouse(data.pos.x * screen.width, data.pos.y * screen.height)
+          }else if (data.type=="keydown"){
+            window.electron.screen.keyDown(data.key)
+          }else if (data.type=="keyup"){
+            window.electron.screen.keyUp(data.key)
           }
           console.log('Received', screen);
         });

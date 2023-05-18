@@ -16,7 +16,7 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import { spawn } from 'child_process';
 
-
+import robot from 'robotjs';
 
 
 
@@ -32,43 +32,9 @@ class AppUpdater {
 
 console.log("test")
 
-var koffi = require("koffi");
-const lib = koffi.load('user32.dll');
 
-var HWND_BROADCAST = 0xffff;
-const WM_RBUTTONDOWN = 0x0204;
-const WM_RBUTTONUP = 0x0205;
-const WM_LBUTTONDOWN = 0x0201;
-const WM_LBUTTONUP = 0x0202;
-//activate window
-const WM_ACTIVATE = 0x0006;
-
-
-//move mouse
-const WM_MOUSEMOVE = 0x0200;
-
-
-
-
-// Find functions
-const SendMessageA = lib.stdcall('SendMessageA', 'int', ['int', 'uint', 'int', 'int']);
-//Get foucs window
-const GetForegroundWindow = lib.stdcall('GetForegroundWindow', 'int', []);
-
-HWND_BROADCAST = GetForegroundWindow();
-
-
-
-let ret =  SendMessageA(HWND_BROADCAST, WM_LBUTTONDOWN, 444, 444);
-let ret2 =  SendMessageA(HWND_BROADCAST, WM_LBUTTONUP, 444, 444);
-//activate window
-let ret3 =  SendMessageA(HWND_BROADCAST, WM_ACTIVATE, 444, 444);
-
-
-
-console.log(ret);
-
-//let ret2 =  SendMessageA(HWND_BROADCAST, WM_LBUTTONUP, 10, 10);
+//var koffi = require("koffi");
+//const lib = koffi.load('user32.dll');
 
 
 
@@ -87,6 +53,27 @@ ipcMain.on('getMousePosition', async (event, arg) => {
   const mousePosition = screen.getCursorScreenPoint();
   event.reply('getMousePosition', mousePosition);
 });
+ipcMain.on('clickMouse', async (event, arg) => {
+  var x = arg.x;
+  var y = arg.y;
+  var userPos = robot.getMousePos();
+  robot.moveMouse(x, y);
+  robot.mouseClick();
+  robot.moveMouse(userPos.x, userPos.y);
+  event.reply('clickMouse', "done");
+});
+ipcMain.on('keyDown', async (event, arg) => {
+  var key = arg.key;
+  robot.keyToggle(key, 'down');
+  event.reply('sendKey', "done");
+});
+ipcMain.on('keyUp', async (event, arg) => {
+  var key = arg.key;
+  robot.keyToggle(key, 'up');
+  event.reply('sendKey', "done");
+});
+
+
 
 
 
