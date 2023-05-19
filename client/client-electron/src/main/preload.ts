@@ -19,6 +19,9 @@ const electronHandler = {
     //ipcMain.on('keyUp', async (event, arg) => {
     keyUp(key: string) {
       ipcRenderer.send('keyUp', {key: key});     
+    },
+    scroll(scroll: number) {
+      ipcRenderer.send('scroll', {scroll: scroll});     
     }
     
   },

@@ -58,8 +58,10 @@ export default function App() {
             window.electron.screen.keyDown(data.key)
           }else if (data.type=="keyup"){
             window.electron.screen.keyUp(data.key)
+          }else if (data.type=="scroll"){
+            window.electron.screen.scroll(data.scroll)
           }
-          console.log('Received', screen);
+          console.log('Received', data);
         });
 
 

@@ -397,6 +397,14 @@ function Dream(props) {
         props.data.send({ type: "mousedown", pos: { x: x, y: y } });
 
     }
+    const handleScroll = (e) => {
+        if (!props.data) {
+            return;
+        }
+        var scroll = e.deltaY;
+        console.log(scroll);
+        props.data.send({ type: "scroll", scroll: scroll });
+    }
     const handleMouseUp =  (e) => {
         if (!props.data) {
             return;
@@ -432,9 +440,7 @@ function Dream(props) {
                     </Box>}
 
                 <div
-                    onDoubleClick={
-                        doubleClickHandler
-                    }
+
                     onMouseMove={
                         handleMouseMove
                     }
@@ -444,6 +450,10 @@ function Dream(props) {
                     onMouseUp={
                         handleMouseUp
                     }
+                    onWheel={
+                        handleScroll
+                    }
+                    
                     className="streamContainer" >
 
 

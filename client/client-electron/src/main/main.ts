@@ -36,23 +36,20 @@ console.log("test")
 //var koffi = require("koffi");
 //const lib = koffi.load('user32.dll');
 
-
-
 let mainWindow: BrowserWindow | null = null;
-
 const { desktopCapturer } = require('electron')
-
-
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
+
 ipcMain.on('getMousePosition', async (event, arg) => {
   const mousePosition = screen.getCursorScreenPoint();
   event.reply('getMousePosition', mousePosition);
 });
+
 ipcMain.on('clickMouse', async (event, arg) => {
   var x = arg.x;
   var y = arg.y;
@@ -72,6 +69,11 @@ ipcMain.on('keyUp', async (event, arg) => {
   robot.keyToggle(key, 'up');
   event.reply('sendKey', "done");
 });
+ipcMain.on('scroll', async (event, arg) => {
+  var scroll = arg.scroll;
+  robot.scrollMouse(scroll, 10);
+  event.reply('scroll', "done");
+});
 
 
 
@@ -85,7 +87,7 @@ if (process.env.NODE_ENV === 'production') {
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (isDebug) {
+if (isDebug && true) {
   require('electron-debug')();
 }
 
@@ -143,8 +145,8 @@ const createWindow = async () => {
    mainWindow.setKiosk(true);
    mainWindow.setMenu(null);
    mainWindow.setMovable(false);
-   mainWindow.setSkipTaskbar(true);
- */
+   mainWindow.setSkipTaskbar(true);*/
+ 
   mainWindow.setFocusable(false);
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
