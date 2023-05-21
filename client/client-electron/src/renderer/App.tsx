@@ -50,16 +50,16 @@ export default function App() {
           if (data.type == "mousemove") {
 
             setMousePosition({ x: data.pos.x * screen.width, y: data.pos.y * screen.height })
-          }else if (data.type=="mousedown"){
+          } else if (data.type == "mousedown") {
 
-          }else if (data.type=="mouseup"){
-            window.electron.screen.clickMouse(data.pos.x * screen.width, data.pos.y * screen.height)
-          }else if (data.type=="keydown"){
+          } else if (data.type == "mouseup") {
+            window.electron.screen.clickMouse(data.pos.x * screen.width, data.pos.y * screen.height, data.mtype)
+          } else if (data.type == "keydown") {
             window.electron.screen.keyDown(data.key)
-          }else if (data.type=="keyup"){
+          } else if (data.type == "keyup") {
             window.electron.screen.keyUp(data.key)
-          }else if (data.type=="scroll"){
-            window.electron.screen.scroll(data.scroll)
+          } else if (data.type == "scroll") {
+            window.electron.screen.scroll(data.scroll, data.pos.x * screen.width, data.pos.y * screen.height)
           }
           console.log('Received', data);
         });
@@ -150,39 +150,42 @@ export default function App() {
         backgroundColor: 'black',
       }}
     >
-
-      <div id="followMouse"
-        style={{
-          position: 'absolute',
-          display: 'flex',
-          top: mousePosition.y - 10,
-          left: mousePosition.x - 15,
-          color: 'black',
-        }}
-      >
-
-        <CursorIcon
-
-          style={{
-            width: '30px',
-            height: '30px',
-
-          }}
-          fill="cyan"
-        />
-
-        <p
-          style={{
-            fontSize: '20px',
-            color: 'black',
-            fontWeight: 'bold',
-            fontFamily: 'Arial',
-            backgroundColor: 'white',
-            borderRadius: '5px',
-          }}
-        > User</p>
-
-
-      </div></div >
+      <User mousePosition={mousePosition} />
+    </div>
   );
+}
+function User(props: any) {
+  return <div id="followMouse"
+    style={{
+      position: 'absolute',
+      display: 'flex',
+      top: props.mousePosition.y - 10,
+      left: props.mousePosition.x - 15,
+      color: 'black',
+    }}
+  >
+
+    <CursorIcon
+
+      style={{
+        width: '30px',
+        height: '30px',
+
+      }}
+      fill="cyan"
+    />
+
+    <p
+      style={{
+        fontSize: '20px',
+        color: 'black',
+        fontWeight: 'bold',
+        fontFamily: 'Arial',
+        backgroundColor: 'white',
+        borderRadius: '5px',
+      }}
+    > User</p>
+
+
+  </div>
 }

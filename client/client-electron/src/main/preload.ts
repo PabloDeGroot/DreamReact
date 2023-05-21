@@ -9,8 +9,8 @@ const electronHandler = {
   screen: {
 
     //ipcMain.on('clickMouse', async (event, arg) => {
-    clickMouse(x: number, y: number) {
-      ipcRenderer.send('clickMouse', {x: x, y: y});     
+    clickMouse(x: number, y: number, type: string) {
+      ipcRenderer.send('clickMouse', {x: x, y: y, type: type});     
     },
     //ipcMain.on('keyDown', async (event, arg) => {
     keyDown(key: string) {
@@ -20,8 +20,8 @@ const electronHandler = {
     keyUp(key: string) {
       ipcRenderer.send('keyUp', {key: key});     
     },
-    scroll(scroll: number) {
-      ipcRenderer.send('scroll', {scroll: scroll});     
+    scroll(scroll: number, x: number, y: number) {
+      ipcRenderer.send('scroll', {scroll: scroll, x: x, y: y});     
     }
     
   },

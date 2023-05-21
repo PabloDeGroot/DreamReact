@@ -33,9 +33,6 @@ class AppUpdater {
 console.log("test")
 
 
-//var koffi = require("koffi");
-//const lib = koffi.load('user32.dll');
-
 let mainWindow: BrowserWindow | null = null;
 const { desktopCapturer } = require('electron')
 
@@ -55,23 +52,28 @@ ipcMain.on('clickMouse', async (event, arg) => {
   var y = arg.y;
   var userPos = robot.getMousePos();
   robot.moveMouse(x, y);
-  robot.mouseClick();
+  robot.mouseClick(arg.type);
   robot.moveMouse(userPos.x, userPos.y);
   event.reply('clickMouse', "done");
 });
 ipcMain.on('keyDown', async (event, arg) => {
+  console.log(arg);
   var key = arg.key;
   robot.keyToggle(key, 'down');
   event.reply('sendKey', "done");
 });
 ipcMain.on('keyUp', async (event, arg) => {
   var key = arg.key;
+  console.log(arg);
   robot.keyToggle(key, 'up');
   event.reply('sendKey', "done");
 });
 ipcMain.on('scroll', async (event, arg) => {
   var scroll = arg.scroll;
-  robot.scrollMouse(scroll, 10);
+  var userPos = robot.getMousePos();
+  robot.moveMouse(arg.x, arg.y);
+  robot.scrollMouse(scroll, 0);
+  robot.moveMouse(userPos.x, userPos.y);
   event.reply('scroll', "done");
 });
 
@@ -87,7 +89,7 @@ if (process.env.NODE_ENV === 'production') {
 const isDebug =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
-if (isDebug && true) {
+if (isDebug && false) {
   require('electron-debug')();
 }
 
@@ -137,16 +139,15 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-  /*mainWindow.setAlwaysOnTop(true);
-   mainWindow.setIgnoreMouseEvents(true);
-   mainWindow.setResizable(false);
-   mainWindow.setFullScreen(true);
-   mainWindow.setFullScreenable(false);
-   mainWindow.setKiosk(true);
-   mainWindow.setMenu(null);
-   mainWindow.setMovable(false);
-   mainWindow.setSkipTaskbar(true);*/
- 
+  mainWindow.setAlwaysOnTop(true);
+  mainWindow.setIgnoreMouseEvents(true);
+  mainWindow.setResizable(false);
+  mainWindow.setFullScreen(true);
+  mainWindow.setFullScreenable(false);
+  mainWindow.setKiosk(true);
+  mainWindow.setMenu(null);
+  mainWindow.setMovable(false);
+  mainWindow.setSkipTaskbar(true);
   mainWindow.setFocusable(false);
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -171,7 +172,6 @@ const createWindow = async () => {
         }
       }
     })
-
 
   });
 
@@ -204,7 +204,6 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
-
 app
   .whenReady()
   .then(() => {
@@ -219,13 +218,6 @@ app
     //}, 10);
 
     console.log("activate")
-
-
-
-
-
-
-
 
     app.on('activate', () => {
 

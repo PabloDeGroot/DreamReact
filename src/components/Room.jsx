@@ -9,7 +9,7 @@ import useLocalStorage from '../Hooks/MyHooks';
 import { useSnackbar } from 'notistack';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client'; //usado para administrar usuarios
-
+import $ from 'jquery';
 
 const peer = new Peer({
 
@@ -342,9 +342,11 @@ function Dream(props) {
 
     }
 
+
     const doubleClickHandler = (e) => {
 
         var target = e.target.parentElement.parentElement.parentElement;
+        console.log(target);
         if (target.classList.contains("☁")) {
 
             var parent = target.parentElement;
@@ -353,6 +355,22 @@ function Dream(props) {
             setMaximized(!maximized);
             setHover(false);
         }
+        if (!maximized) {
+            //remove all listeners
+
+            //document.addEventListener("keydown", handleKeyDown);
+            //document.addEventListener("keyup", handleKeyUp);
+            $(document).on("keydown", handleKeyDown);
+            $(document).on("keyup", handleKeyUp);
+        } else {
+            //document.removeEventListener("keydown", handleKeyDown);
+            //document.removeEventListener("keyup", handleKeyUp);
+            $(document).off("keydown");
+            $(document).off("keyup");
+        }
+
+
+
     }
     const handleMouseOver = (e) => {
         if (!maximized) {
@@ -377,11 +395,11 @@ function Dream(props) {
 
 
         props.data.send({ type: "mousemove", pos: { x: x, y: y } });
-        
+
 
 
     }
-    const handleMouseDown= (e) => {
+    const handleMouseDown = (e) => {
         if (!props.data) {
             return;
         }
@@ -393,7 +411,7 @@ function Dream(props) {
         var maxY = e.target.clientHeight;
         //normalize x and y
         x = x / maxX;
-        y = y / maxY;        
+        y = y / maxY;
         props.data.send({ type: "mousedown", pos: { x: x, y: y } });
 
     }
@@ -401,14 +419,7 @@ function Dream(props) {
         if (!props.data) {
             return;
         }
-        var scroll = e.deltaY;
-        console.log(scroll);
-        props.data.send({ type: "scroll", scroll: scroll });
-    }
-    const handleMouseUp =  (e) => {
-        if (!props.data) {
-            return;
-        }
+
         var rect = e.target.getBoundingClientRect();
         var x = e.clientX - rect.left; //x position within the element.
         var y = e.clientY - rect.top;  //y position within the element.
@@ -417,9 +428,65 @@ function Dream(props) {
         var maxY = e.target.clientHeight;
         //normalize x and y
         x = x / maxX;
-        y = y / maxY;        
-        props.data.send({ type: "mouseup", pos: { x: x, y: y } });
-        
+        y = y / maxY;
+
+        var scroll = e.deltaY;
+        console.log(scroll);
+        props.data.send({ type: "scroll", scroll: scroll, pos: { x: x, y: y } });
+    }
+    const handleMouseUp = (e) => {
+        if (!props.data) {
+            return;
+        }
+
+        var mtype;
+        //check if right click
+        if (e.button == 2) {
+            mtype = "right";
+        } else if (e.button == 0) {
+            mtype = "left";
+        } else {
+            mtype = "middle";
+        }
+
+        var rect = e.target.getBoundingClientRect();
+        var x = e.clientX - rect.left; //x position within the element.
+        var y = e.clientY - rect.top;  //y position within the element.
+        //get element height and width
+        var maxX = e.target.clientWidth;
+        var maxY = e.target.clientHeight;
+        //normalize x and y
+        x = x / maxX;
+        y = y / maxY;
+        props.data.send({ type: "mouseup", pos: { x: x, y: y }, mtype: mtype });
+
+
+    }
+    const handleKeyDown = (e) => {
+        if (!props.data) {
+            console.log(e);
+            return;
+        }
+        //win key
+        if(e.key == "Meta"){
+            return;
+        }
+        console.log(e);
+        props.data.send({ type: "keydown", key: e.key.toLowerCase() });
+    }
+    const handleKeyUp = (e) => {
+        if (!props.data) {
+            console.log(e);
+            return;
+        }
+        //win key
+        if(e.key == "Meta"){
+            return;
+        }
+
+        console.log(e);
+
+        props.data.send({ type: "keyup", key: e.key.toLowerCase() });
     }
 
     //onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} 
@@ -429,6 +496,11 @@ function Dream(props) {
             <div
 
                 className="☁" >
+                <div className='fullscreen'>
+                    <IconButton onClick={doubleClickHandler} size='large'>
+                        <Icon sx={{ color: "white" }}>{maximized ? "fullscreen_exit" : "fullscreen"}</Icon>
+                    </IconButton>
+                </div>
                 <Collapse style={{ zIndex: 100, position: "absolute", width: "100%" }} in={hover}>
                     <Paper square style={{ opacity: 0.5, backdropFilter: "blur(50px)" }}  >
                         <Box justifyContent={"center"} textAlign={"center"}><Typography fontWeight={"bold"}>{props.username}</Typography></Box>
@@ -447,13 +519,17 @@ function Dream(props) {
                     onMouseDown={
                         handleMouseDown
                     }
+
                     onMouseUp={
                         handleMouseUp
                     }
                     onWheel={
                         handleScroll
                     }
-                    
+                    onKeyDown={() => { console.log("keydown") }}
+
+
+
                     className="streamContainer" >
 
 
@@ -476,6 +552,7 @@ function Dream(props) {
                         </Fab>
                     </Zoom>
                 </Box>
+
 
             </div>
         </>
