@@ -25,11 +25,18 @@ export default function App() {
 
 
 
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [users, setUsers] = useState([] as any);
   const [stream, setStream] = useState(null as any);
 
+  const [peers, setPeers] = useState([] as any);
 
   console.log("App.tsx: App()");
+
+
+  useEffect(() => {
+    console.log("App.tsx: useEffect()");
+    console.log(users);
+  }, [users]);
 
 
   useEffect(() => {
@@ -41,32 +48,43 @@ export default function App() {
 
 
     var callPeer = (peer: Peer, peerid: string, stream: MediaStream) => {
-      console.log("App.tsx: Welcome");
-      var e = peer.connect(peerid, { metadata: { username: "electron" } });
-      e.on('open', async function () {
+      var user = peer.connect(peerid, { metadata: { username: "electron" } });
+      setPeers((peers: any) => [...peers, user]);
+      var spectator = peer.call(peerid, stream, { metadata: { username: "electron" } });
+      if (user.dataChannel) {
+        user.dataChannel.onerror = (e: Event) => {
+          console.log("Error datachannel");
+          console.log(e);
+          setPeers((peers: any) => peers.filter((p: any) => p.peer != peerid));
+          spectator.close();
 
-
-        e.on('data', (data: any) => {
-          if (data.type == "mousemove") {
-
-            setMousePosition({ x: data.pos.x * screen.width, y: data.pos.y * screen.height })
-          } else if (data.type == "mousedown") {
-
-          } else if (data.type == "mouseup") {
-            window.electron.screen.clickMouse(data.pos.x * screen.width, data.pos.y * screen.height, data.mtype)
-          } else if (data.type == "keydown") {
-            window.electron.screen.keyDown(data.key)
-          } else if (data.type == "keyup") {
-            window.electron.screen.keyUp(data.key)
-          } else if (data.type == "scroll") {
-            window.electron.screen.scroll(data.scroll, data.pos.x * screen.width, data.pos.y * screen.height)
-          }
-          console.log('Received', data);
-        });
-
-
-        var spectator = peer.call(peerid, stream, { metadata: { username: "electron" } });
+        };
+      }
+      user.on('close', () => {
+        setPeers((peers: any) => peers.filter((p: any) => p.peer != peerid));
+      });/*
+      user.on('error', () => {
+        setPeers((peers: any) => peers.filter((p: any) => p.peer != peerid));
       });
+      if (user.dataChannel) {
+        user.dataChannel.onerror = (e: Event) => {
+          console.log("Error datachannel");
+          console.log(e);
+          setPeers((peers: any) => peers.filter((p: any) => p.peer != peerid));1
+        };
+      }
+
+
+      spectator.on('close', () => {
+        setPeers((peers: any) => peers.filter((p: any) => p.peer != peerid));
+      });
+      spectator.on('error', () => {
+        spectator.close();
+        console.log("error");
+        setPeers((peers: any) => peers.filter((p: any) => p.peer != peerid));
+      });*/
+
+
     }
     var handlePeerConnect = (peer: Peer, stream: MediaStream) => {
       console.log("App.tsx: handlePeerConnect()");
@@ -150,29 +168,69 @@ export default function App() {
         backgroundColor: 'black',
       }}
     >
-      <User mousePosition={mousePosition} />
+      {peers.map((user: any, i: number) => {
+        return <User key={i} peer={user} />
+      })}
     </div>
   );
 }
 function User(props: any) {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [color, setColor] = useState("black");
+  const [username, setUsername] = useState("aa");
+
+  useEffect(() => {
+    props.peer.off('open').on('open', async function () {
+
+      props.peer.off('welcome').on('welcome', (data: any) => {
+        //setUsername(data.username)
+        setColor(data.color)
+      });
+      props.peer.off('data').on('data', (data: any) => {
+        if (data.type == "mousemove") {
+
+          setMousePosition({ x: data.pos.x * screen.width, y: data.pos.y * screen.height })
+
+        } else if (data.type == "mousedown") {
+
+        } else if (data.type == "mouseup") {
+          window.electron.screen.clickMouse(data.pos.x * screen.width, data.pos.y * screen.height, data.mtype)
+        } else if (data.type == "keydown") {
+          window.electron.screen.keyDown(data.key)
+        } else if (data.type == "keyup") {
+          window.electron.screen.keyUp(data.key)
+        } else if (data.type == "scroll") {
+          window.electron.screen.scroll(data.scroll, data.pos.x * screen.width, data.pos.y * screen.height)
+        } else if (data.type == "welcome") {
+          setUsername(data.username.username)
+          setColor(data.color)
+        }
+        console.log('Received', data);
+      });
+
+
+    });
+  }, []);
+
   return <div id="followMouse"
     style={{
       position: 'absolute',
       display: 'flex',
-      top: props.mousePosition.y - 10,
-      left: props.mousePosition.x - 15,
+      top: mousePosition.y - 10,
+      left: mousePosition.x - 15,
       color: 'black',
+
     }}
   >
 
     <CursorIcon
 
       style={{
-        width: '30px',
-        height: '30px',
+        width: '25px',
+        height: '25spx',
 
       }}
-      fill="cyan"
+      fill={color}
     />
 
     <p
@@ -181,10 +239,11 @@ function User(props: any) {
         color: 'black',
         fontWeight: 'bold',
         fontFamily: 'Arial',
-        backgroundColor: 'white',
+        backgroundColor: '#ffffff50',
+        paddingInline: '5px',
         borderRadius: '5px',
       }}
-    > User</p>
+    > {username}</p>
 
 
   </div>

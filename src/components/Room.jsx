@@ -11,6 +11,8 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client'; //usado para administrar usuarios
 import $ from 'jquery';
 
+import { useTheme } from '@mui/material/styles';
+
 const peer = new Peer({
 
 });
@@ -36,7 +38,7 @@ function Room(props) {
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const [dataConnections, setDataConnections] = React.useState([]);
-
+    const theme = useTheme();
 
     const forceUpdate = () => {
 
@@ -90,11 +92,6 @@ function Room(props) {
 
 
     peer.off('connection').on('connection', (conn) => {
-        setInterval(() => {
-            var data = Math.random() * 100;
-            //console.log(data);
-            //conn.send(data);
-        }, 100);
         let auxDreams = dreams;
         console.log("AAAAA");
 
@@ -271,7 +268,7 @@ function Room(props) {
             <div className="roomBack" >
                 <div className="dreamContainer grid" >
                     {Object.keys(dreams).map((key) => {
-                        return <Dream stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
+                        return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
                     })}
                 </div>
                 {isScreenCapOn &&
@@ -329,7 +326,21 @@ function Dream(props) {
     const [soundOn, setSoundOn] = React.useState(false);
     const [maximized, setMaximized] = React.useState(false);
 
-
+    useEffect(() => {
+        if (props.data) {
+            //{ type: "mousedown", pos: { x: x, y: y } }
+            console.log("sending welcome");
+            console.log(props.data);
+            if (!props.data.open) {
+                props.data.on("open", () => {
+                    props.data.send({ type: "welcome", username: props.user, color: props.color });
+                }
+                )
+            } else {
+                props.data.send({ type: "welcome", username: props.username, color: props.color });
+            }
+        }
+    }, [null])
     const videoReadyHandler = (e) => { // Inecesario, el video no se reproduce por que no interactua el usuario con la pagina. (Mutear el video, hacer que el usuario desmuteo)
         delay(100).then(() => {
             try {
@@ -341,7 +352,6 @@ function Dream(props) {
 
 
     }
-
 
     const doubleClickHandler = (e) => {
 
@@ -468,7 +478,7 @@ function Dream(props) {
             return;
         }
         //win key
-        if(e.key == "Meta"){
+        if (e.key == "Meta") {
             return;
         }
         console.log(e);
@@ -480,7 +490,7 @@ function Dream(props) {
             return;
         }
         //win key
-        if(e.key == "Meta"){
+        if (e.key == "Meta") {
             return;
         }
 
@@ -542,18 +552,6 @@ function Dream(props) {
                     } onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
 
                 </div>
-                <Box className="options">
-                    <Zoom in={hover}>
-                        <Fab onClick={() => { setSoundOn(!soundOn) }} sx={{ margin: "10px" }}>
-                            <Icon >
-                                {soundOn ? "volume_up" : "volume_mute"}
-                            </Icon>
-
-                        </Fab>
-                    </Zoom>
-                </Box>
-
-
             </div>
         </>
     )
