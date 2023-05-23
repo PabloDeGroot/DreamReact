@@ -261,7 +261,7 @@ function Room(props) {
 
         window.location.href = "dream:"+room + "@@@" + user.username;
         enqueueSnackbar(<p>Es necesario <a 
-        href="%PUBLIC_URL%/DreamReact%20Setup.exe">Descargar</a> la app</p>, { variant: 'info' });
+        href={process.env.PUBLIC_URL+ "/DreamReact%20Setup.exe"}>Descargar</a> la app</p>, { variant: 'info' });
         
 
 
