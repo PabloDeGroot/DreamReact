@@ -22,6 +22,17 @@ if(!app.isDefaultProtocolClient('dream')){
   app.setAsDefaultProtocolClient('dream')
   app.quit()
 }
+
+const gotTheLock = app.requestSingleInstanceLock()
+    
+if (gotTheLock) {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    app.quit()
+   
+  })
+}
+
 //import ffmpeg from 'ffmpeg-static';
 class AppUpdater {
   constructor() {
@@ -31,12 +42,13 @@ class AppUpdater {
   }
 }
 if (process.argv[1] != null) {
-global.room = process.argv[1].split("@@@")[0];
+  //dream:room@@@username
+  //remove dream:
+global.room = process.argv[1].split("@@@")[0].split(":")[1];
 global.username = process.argv[1].split("@@@")[1];
 console.log(process.argv);
 }else{
-  global.room = "test";
-  global.username = "test";
+  app.quit();
 }
 
 
@@ -155,7 +167,7 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-
+/*
   mainWindow.setAlwaysOnTop(true);
   mainWindow.setIgnoreMouseEvents(true);
   mainWindow.setResizable(false);
@@ -165,7 +177,7 @@ const createWindow = async () => {
   mainWindow.setMenu(null);
   mainWindow.setMovable(false);
   mainWindow.setSkipTaskbar(true);
-  mainWindow.setFocusable(false);
+  mainWindow.setFocusable(false);*/
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');

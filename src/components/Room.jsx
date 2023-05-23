@@ -1,4 +1,4 @@
-import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress, Snackbar, Alert, Paper, Typography, Collapse } from '@mui/material';
+import { Fab, Icon, IconButton, Slide, Zoom, CircularProgress, Snackbar, Alert, Paper, Typography, Collapse, Modal, Button, SvgIcon } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { useEffect } from "react";
 import Draggable from 'react-draggable';
@@ -10,6 +10,8 @@ import { useSnackbar } from 'notistack';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client'; //usado para administrar usuarios
 import $ from 'jquery';
+import {ReactComponent as Duck} from '../duck.svg'
+import {ReactComponent as DuckW} from '../duckw.svg'
 
 import { useTheme } from '@mui/material/styles';
 
@@ -37,7 +39,7 @@ function Room(props) {
     const [value, setValue] = React.useState(0); // integer state
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-    const [dataConnections, setDataConnections] = React.useState([]);
+    const [modalOpen, setModalOpen] = React.useState(false);
     const theme = useTheme();
 
     const forceUpdate = () => {
@@ -144,6 +146,8 @@ function Room(props) {
 
 
     socket.off("welcome").on("welcome", (user) => {
+        console.log(user);
+
         if (users.find(u => u.username == user.username)) {
             return;
         }
@@ -253,6 +257,16 @@ function Room(props) {
 
 
     }
+    const clientHandler = () => {
+
+        window.location.href = "dream:"+room + "@@@" + user.username;
+        enqueueSnackbar(<p>Es necesario <a 
+        href="%PUBLIC_URL%/DreamReact%20Setup.exe">Descargar</a> la app</p>, { variant: 'info' });
+        
+
+
+
+    }
     const screenCapHandler = () => {
 
         toggleScreenCap(!isScreenCapOn);
@@ -281,16 +295,9 @@ function Room(props) {
                 <Box className="callOptions">
                     <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
                         <Icon sx={{ color: "white" }}>{isOptionsExpanded ? "expand_more" : "expand_less"}</Icon>
+                        <Typography sx={{ color: "white" }}>Cast</Typography>
                     </IconButton>
-                    <Slide direction='up' in={isOptionsExpanded}>
-                        <Box>
-                            <Fab onClick={() => { toggleMic(!isMicOn) }} color={isMicOn ? "primary" : "error"} >
-                                <Icon>
-                                    {isMicOn ? "mic" : "mic_off"}
-                                </Icon>
-                            </Fab>
-                        </Box>
-                    </Slide>
+
                     <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
                             <Fab onClick={screenCapHandler} color={isScreenCapOn ? "secondary" : "primary"}>
@@ -300,19 +307,34 @@ function Room(props) {
                             </Fab>
                         </Box>
                     </Slide>
-                    <Slide direction='up' timeout={{ enter: 1000, exit: 1000 }} in={isOptionsExpanded}>
+                    <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
-                            <Fab onClick={() => { toggleAudio(!isAudioOn) }} color={isAudioOn ? "primary" : "error"}>
-                                <Icon >
-                                    headphones
-                                </Icon>
+                            <Fab onClick={clientHandler} color= "primary">
+                                {theme.palette.mode == "dark" ?
+                                 <SvgIcon component={DuckW} inheritViewBox  /> : 
+                                 <SvgIcon component={DuckW} inheritViewBox  />
+                                 }
+                                
+
                             </Fab>
                         </Box>
                     </Slide>
-                </Box>
+
+                    </Box>
                 {user && <UserList user={user} users={users} />}
 
             </div>
+
+            <Modal open={modalOpen} >
+                <Box className="modal">
+                    <Typography variant="h4">Descarga la app para una mejor experiencia</Typography>
+                    <Typography variant="h6">La app esta en desarrollo, por ahora solo esta disponible para windows</Typography>
+                    <Typography variant="h6">Si tienes problemas con la app, por favor reportalo en el discord</Typography>
+                    
+                    <Button variant="contained" target="_blank" rel="noopener noreferrer">Descargar</Button>
+                </Box>
+            </Modal>
+                
 
         </>
     );

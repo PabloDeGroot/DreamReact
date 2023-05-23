@@ -10,7 +10,7 @@ import io from "socket.io-client";
 
 
 
-const local = true;
+const local = false;
 //const lib = koffi.load("user32.dll")
 
 
@@ -92,11 +92,28 @@ export default function App() {
       console.log("App.tsx: handlePeerConnect()");
       var room = await window.electron.screen.getRoom();
       var username = await window.electron.screen.getUsername();
+      if (room == undefined || username == undefined) {
+        room = "room";
+        username = "user";
+      }
       console.log("App.tsx: Room: " + room);
       console.log("App.tsx: Username: " + username);
 
       socket.emit("hello", { id: peer.id + "", username: username, room: room, client: "electron" });
-      socket.on("userlist", (data: any) => {
+      //data is array
+      socket.on("userlist", (data:{
+          username: string;
+          room: string;
+        }[]
+      ) => {
+        console.log("App.tsx: userlist: ")
+        console.log(data);
+
+        data = JSON.parse(JSON.stringify(data));
+        if (data.length == 0) {
+          
+          return;
+        }
         data.forEach((user: any) => {
           callPeer(peer, user.id, stream);
         });

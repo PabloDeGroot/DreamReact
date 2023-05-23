@@ -13,18 +13,19 @@ var httpServer;
 
 
 if (!local) {
-var cert = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/fullchain.pem');
-var key = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/privkey.pem');
+    var cert = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/fullchain.pem');
+    var key = fs.readFileSync('/etc/letsencrypt/live/duckhub.dev/privkey.pem');
 
 
- httpServer = https.createServer(
-    {
-        key: key,
-        cert: cert
-    }
-);}
-else{
-     httpServer = createServer();
+    httpServer = https.createServer(
+        {
+            key: key,
+            cert: cert
+        }
+    );
+}
+else {
+    httpServer = createServer();
 }
 
 const login = async (username, password) => {
@@ -158,25 +159,33 @@ io.on("connection", (socket) => {
             rooms[data.room] = {}
             users = rooms[data.room]
         }
-
+        globalUsers[socket.id] = {
+            id: data.id,
+            room: data.room
+        }
         if (data.client != "electron") {
             rooms[data.room][socket.id] = {
                 username: data.username,
                 id: data.id
             }
-            globalUsers[socket.id] = {
-                id: data.id,
-                room: data.room
-            }
 
             socket.to(data.room).emit("welcome", rooms[data.room][socket.id])
-        }else{
+
+        } else {
+            Object.values(users).forEach((user) => {
+                socket.emit("welcome", user)
+            })
+
+            //socket.emit("userlist", users);
+            //console.log(data)
+            //socket.to(data.room).emit("welcome", {username: data.username, id: data.id})
             console.log("electron")
         }
+
         //console.log(users);
 
         socket.join(data.room)
-        socket.emit("userlist", Object.values(users).filter((user) => user.id != data.id));
+        //socket.emit("userlist", Object.values(users).filter((user) => user.id != data.id));
 
     })
     socket.on("stop", (data) => {
@@ -185,13 +194,16 @@ io.on("connection", (socket) => {
     socket.on('disconnect', () => {
         console.log("disconnect");
         let user = globalUsers[socket.id]
+        console.log(user)
         console.log(rooms)
 
         if (user != undefined) {
             socket.to(user.room).emit("goodbye", user.id);
-            delete rooms[user.room][socket.id];
-            if (Object.keys(rooms[user.room]).length == 0) {
-                delete rooms[user.room]
+            if (rooms[user.room] != undefined) {
+                delete rooms[user.room][socket.id];
+                if (Object.keys(rooms[user.room]).length == 0) {
+                    delete rooms[user.room]
+                }
             }
             delete globalUsers[socket.id]
         }
