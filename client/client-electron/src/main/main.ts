@@ -17,17 +17,12 @@ import { resolveHtmlPath } from './util';
 import { spawn } from 'child_process';
 
 import robot from 'robotjs';
-import { electron } from 'process';
 
-if (require('electron-squirrel-startup')) {
-  app.quit();
+if(!app.isDefaultProtocolClient('dream')){
+  app.setAsDefaultProtocolClient('dream')
+  app.quit()
 }
-
-const electronInstaller = require('electron-winstaller');
-
-
 //import ffmpeg from 'ffmpeg-static';
-
 class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';

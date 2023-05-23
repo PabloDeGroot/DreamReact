@@ -184,6 +184,12 @@
       "node_modules",
       "package.json"
     ],
+    "protocols": {
+      "name": "Compartir Pantalla de DreamReact",
+      "schemes": [
+        "dream"
+      ]
+    },
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {
       "target": {
