@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, screen } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, screen, Tray, Menu } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -17,7 +17,13 @@ import { resolveHtmlPath } from './util';
 import { spawn } from 'child_process';
 
 import robot from 'robotjs';
+import { electron } from 'process';
 
+if (require('electron-squirrel-startup')) {
+  app.quit();
+}
+
+const electronInstaller = require('electron-winstaller');
 
 
 //import ffmpeg from 'ffmpeg-static';
@@ -29,8 +35,15 @@ class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
   }
 }
+if (process.argv[1] != null) {
+global.room = process.argv[1].split("@@@")[0];
+global.username = process.argv[1].split("@@@")[1];
+console.log(process.argv);
+}else{
+  global.room = "test";
+  global.username = "test";
+}
 
-console.log("test")
 
 
 let mainWindow: BrowserWindow | null = null;
@@ -76,6 +89,15 @@ ipcMain.on('scroll', async (event, arg) => {
   robot.moveMouse(userPos.x, userPos.y);
   event.reply('scroll', "done");
 });
+ipcMain.on('getRoom', async (event, arg) => {
+  console.log(global.room);
+  event.reply('getRoom', global.room);
+});
+ipcMain.on('getUsername', async (event, arg) => {
+  console.log(global.username);
+  event.reply('getUsername', global.username);
+});
+
 
 
 
@@ -105,21 +127,20 @@ const installExtensions = async () => {
     )
     .catch(console.log);
 };
+const RESOURCES_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../../assets');
 
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
 const createWindow = async () => {
   if (isDebug && false) {
     await installExtensions();
   }
 
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
 
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
   let { width, height } = require('electron').screen.getPrimaryDisplay().size;
-
   mainWindow = new BrowserWindow({
     show: false,
     width: width,
@@ -139,8 +160,8 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-  
- /*mainWindow.setAlwaysOnTop(true);
+
+  mainWindow.setAlwaysOnTop(true);
   mainWindow.setIgnoreMouseEvents(true);
   mainWindow.setResizable(false);
   mainWindow.setFullScreen(true);
@@ -149,7 +170,7 @@ const createWindow = async () => {
   mainWindow.setMenu(null);
   mainWindow.setMovable(false);
   mainWindow.setSkipTaskbar(true);
-  mainWindow.setFocusable(false);*/
+  mainWindow.setFocusable(false);
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
@@ -205,10 +226,25 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+let tray = null
+//Create tray icon with exit option
 app
   .whenReady()
   .then(() => {
     createWindow();
+    tray = new Tray(path.join(getAssetPath(), 'icon.png'))
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Exit',
+        click: () => {
+          app.quit()
+        }
+      }
+    ])
+    tray.setToolTip('Estas compartiendo pantalla')
+    tray.setContextMenu(contextMenu)
+
+
 
 
     //mainWindow?.webContents.send('sendStream', stream);

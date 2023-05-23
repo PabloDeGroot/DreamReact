@@ -22,7 +22,25 @@ const electronHandler = {
     },
     scroll(scroll: number, x: number, y: number) {
       ipcRenderer.send('scroll', {scroll: scroll, x: x, y: y});     
-    }
+    },
+    getRoom() {
+       ipcRenderer.send('getRoom');
+       return new Promise((resolve, reject) => {
+          ipcRenderer.on('getRoom', (event, arg) => {
+            resolve(arg);
+          });
+        }
+      );
+    },
+    getUsername() {
+        ipcRenderer.send('getUsername');
+        return new Promise((resolve, reject) => {
+          ipcRenderer.on('getUsername', (event, arg) => {
+            resolve(arg);
+          });
+        }
+      );
+    },
     
   },
     

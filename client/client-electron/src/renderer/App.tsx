@@ -8,8 +8,11 @@ import Peer from 'peerjs'; // usado para WebRTC
 //socket.io-client
 import io from "socket.io-client";
 
+
+
 const local = true;
 //const lib = koffi.load("user32.dll")
+
 
 
 var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
@@ -17,7 +20,6 @@ var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 const socket = io(url, { secure: false, reconnection: true, rejectUnauthorized: false })
 
 const username = "user";
-const room = "room";
 
 
 
@@ -86,8 +88,13 @@ export default function App() {
 
 
     }
-    var handlePeerConnect = (peer: Peer, stream: MediaStream) => {
+    var handlePeerConnect = async (peer: Peer, stream: MediaStream) => {
       console.log("App.tsx: handlePeerConnect()");
+      var room = await window.electron.screen.getRoom();
+      var username = await window.electron.screen.getUsername();
+      console.log("App.tsx: Room: " + room);
+      console.log("App.tsx: Username: " + username);
+
       socket.emit("hello", { id: peer.id + "", username: username, room: room, client: "electron" });
       socket.on("userlist", (data: any) => {
         data.forEach((user: any) => {
