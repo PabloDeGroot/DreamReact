@@ -76,11 +76,12 @@ function Login(props) {
             enqueueSnackbar("Login Failed", { variant: 'error' })
         }
     });
-    io.off('register').on('register', (call) => {
-        console.log(call);
-        if (call.success) {
+    io.off('register').on('register', (data) => {
+        console.log(data);
+        if (data) {
             setIsLoginPage(true);
             //window.location.reload();
+            enqueueSnackbar("Register Success", { variant: 'success' })
         }
         else {
             enqueueSnackbar("Register Failed", { variant: 'error' })

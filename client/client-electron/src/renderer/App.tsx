@@ -10,7 +10,7 @@ import io from "socket.io-client";
 
 
 
-const local = false;
+const local = true;
 //const lib = koffi.load("user32.dll")
 
 
@@ -101,19 +101,19 @@ export default function App() {
 
       socket.emit("hello", { id: peer.id + "", username: username, room: room, client: "electron" });
       //data is array
-      socket.on("userlist", (data:{
-          username: string;
-          room: string;
-        }[]
+      socket.on("userlist", (data:any
       ) => {
         console.log("App.tsx: userlist: ")
         console.log(data);
+        socket.emit("message",data)
 
         data = JSON.parse(JSON.stringify(data));
         if (data.length == 0) {
+        socket.emit("message","no data")
           
           return;
         }
+
         data.forEach((user: any) => {
           callPeer(peer, user.id, stream);
         });
