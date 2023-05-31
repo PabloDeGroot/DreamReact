@@ -41,7 +41,31 @@ const login = async (username, password) => {
     let success = false
     return new Promise(function (resolve, reject) {
 
-            fs.createReadStream("users.csv")
+        fs.readFile("users.csv", (err, data) => {
+            if (err) {
+                console.log(err)
+                reject(err)
+            }
+            else {
+                console.log(data)
+                let lines = data.toString().trim().split("\n")
+                console.log(lines)
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i].split(",")
+                    console.log(line)
+                    if (line[0] == username && line[1] == pass) {
+                        console.log("user found")
+                        uuid = line[2]
+                        success = true
+                        break;
+                    }
+                }
+                resolve({ uuid: uuid, username: username, success: success })
+            }
+        })
+        
+
+            /*fs.createReadStream("users.csv")
             .pipe(csv.parse({ columns:true }))
             .on('error', error => reject(error))
             .on('data', row => data.push(row))
@@ -57,7 +81,7 @@ const login = async (username, password) => {
                     }
                 }
                 resolve({ uuid: uuid, username: username, success: success })
-            });
+            });*/
     })
 
 }
@@ -71,7 +95,30 @@ const userExists = (username) => {
 
     let data = []
     return new Promise(function (resolve, reject) {
-        fs.createReadStream("users.csv")
+        fs.readFile("users.csv", (err, data) => {
+            if (err) {
+                console.log(err)
+                reject(err)
+            }
+            else {
+                console.log(data)
+                let lines = data.toString().trim().split("\n")
+                console.log(lines)
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i].split(",")
+                    console.log(line)
+                    if (line[0] == username) {
+                        console.log("user found")
+                        resolve(true)
+                        break;
+                    }
+                }
+                resolve(false)
+            }
+        })
+    })
+
+        /*fs.createReadStream("users.csv")
             .pipe(csv.parse({ columns: true }))
             .on('error', error => reject(error))
             .on('data', row => data.push(row))
@@ -87,7 +134,7 @@ const userExists = (username) => {
                 }
                 resolve(false)
             });
-    })
+    })*/
 
 }
 
@@ -163,6 +210,7 @@ io.on("connection", (socket) => {
             }
 
             socket.to(data.room).emit("welcome", rooms[data.room][socket.id])
+            socket.emit("userlist", Object.values(users).filter((user) => user.id != data.id));
 
         } else {
 

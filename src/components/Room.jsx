@@ -66,19 +66,22 @@ function Room(props) {
         if (user == null) {
             navigate("/");
         }
-        socket.on("connect", () => {
+        socket.off("connect").on("connect", () => {
 
             if (peer.open) {
+                console.log(peer.id);
 
                 socket.emit("hello", { id: peer.id + "", username: user.username, room: room });
             } else {
 
+
                 peer.on("open", (id) => {
+                    console.log(peer.id);
                     socket.emit("hello", { id: id + "", username: user.username, room: room });
                 });
             }
         });
-        socket.on("userlist", (users) => {
+        socket.off("userlist").on("userlist", (users) => {
             console.log("userlist");
             setUsers(users);
         });
@@ -139,7 +142,13 @@ function Room(props) {
         call.on("error", (e) => {
             console(e);
             var auxDreams = dreams;
-            delete auxDreams[call.peer];
+            //delete auxDreams[call.peer];
+            //splice
+            let index = auxDreams.indexOf(call.peer);
+            if (index > -1) {
+                auxDreams.splice(index, 1);
+            }
+                
             setDreams(auxDreams);
         })
     })
@@ -156,7 +165,7 @@ function Room(props) {
         enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
 
         setUsers((prevUsers) => {
-            prevUsers = prevUsers.filter(Boolean);// algunos ids son strings otros no por algun motivo
+            //prevUsers = prevUsers.filter(Boolean);// algunos ids son strings otros no por algun motivo
             return [
                 ...prevUsers,
                 user
@@ -175,13 +184,19 @@ function Room(props) {
         if (user) {
             enqueueSnackbar(user.username + " se a desconectado :c", { variant: 'error' });
             var auxUsers = users;
-            delete auxUsers[users.indexOf(user)];
+            //delete auxUsers[users.indexOf(user)];
+            let index = auxUsers.indexOf(user);
+            if (index > -1) {
+                auxUsers.splice(index, 1);
+            }
+
             setUsers(auxUsers);
         }
         var auxDreams = dreams;
 
 
         delete auxDreams[id];
+        
 
         setDreams(auxDreams);
         forceUpdate();
@@ -609,15 +624,16 @@ function LocalDream(props) {
 
 function UserList(props) {
 
-    props.users.push(<div>{props.user.username}</div>)
+    //props.users.push(<div>{props.user.username}</div>)
     return (
 
         <div className='userList ☁'>
+            {props.user && <div>{props.user.username}</div>}
 
             {props.users.map((user, index) => {
                 return <div key={index}>{user.username}</div>
             })
-            }
+        }
 
 
         </div>
