@@ -79,16 +79,17 @@ function Room(props) {
             }
         });
         socket.on("userlist", (users) => {
+            console.log("userlist");
             setUsers(users);
         });
 
 
-        return () => {
+        /*return () => {
             socket.off("connect");
             socket.off("userList");
             socket.off("welcome");
             socket.off("goodbye");
-        }
+        }*/
 
     }, [])
 
@@ -218,6 +219,7 @@ function Room(props) {
                     var e = peer.connect(user.id, { metadata: { username: user.username } });
                     e.addListener("open", () => {
                         e.send("hello");
+                        
                     })
                     e.addListener("data", (data) => {
                         console.log(data);
@@ -606,33 +608,22 @@ function LocalDream(props) {
 }
 
 function UserList(props) {
-    const users = renderUsers(props.users);
 
-    users.push(<div>{props.user.username}</div>)
+    props.users.push(<div>{props.user.username}</div>)
     return (
 
         <div className='userList ☁'>
 
-            {users}
+            {props.users.map((user, index) => {
+                return <div key={index}>{user.username}</div>
+            })
+            }
 
 
         </div>
     )
 
 }
-function renderUsers(users) {
-
-    if (users.length > 0) {
-        return users.map((user, index) => {
-
-            return <div>{user.username}</div>
-        })
-    } else {
-        return [];
-    }
-
-}
-
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }

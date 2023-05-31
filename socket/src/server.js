@@ -29,23 +29,7 @@ else {
 }
 
 const login = async (username, password) => {
-    /*const getFileContents = async (filepath) => {
-  const data = [];
-
-  return new Promise(function(resolve, reject) {
-    fs.createReadStream(filepath)
-      .pipe(csv.parse({ headers: true }))
-      .on('error', error => reject(error))
-      .on('data', row => data.push(row))
-      .on('end', () => {
-        console.log(data);
-        resolve(data);
-      });
-  });
-} */
     let pass = crypto.createHash('md5').update(password).digest("hex")
-    console.log("Pass encriptada")
-    console.log(pass)
     let columns = {
         username: 'username',
         password: 'password',
@@ -56,8 +40,9 @@ const login = async (username, password) => {
     let uuid = ""
     let success = false
     return new Promise(function (resolve, reject) {
-        fs.createReadStream("users.csv")
-            .pipe(csv.parse({ headers: true, columns: true }))
+
+            fs.createReadStream("users.csv")
+            .pipe(csv.parse({ columns:true }))
             .on('error', error => reject(error))
             .on('data', row => data.push(row))
             .on('end', () => {
@@ -71,22 +56,23 @@ const login = async (username, password) => {
                         break;
                     }
                 }
-                console.log(uuid)
                 resolve({ uuid: uuid, username: username, success: success })
             });
     })
+
 }
 
 const userExists = (username) => {
-    let columns = {
-        username: 'username',
-        password: 'password',
-        user_id: 'user_id'
-    }
+
+
+
+//Pablo4,b1e889533f311ce384fbe51963b0f861,e5d8efe0-cb1d-4b8f-ac87-7f4148089c5f
+//AAAA,25d55ad283aa400af464c76d713c07ad,4ba5825d-5d50-4466-b70f-c04d9c669b5a
+
     let data = []
     return new Promise(function (resolve, reject) {
         fs.createReadStream("users.csv")
-            .pipe(csv.parse({ headers: true, columns: true }))
+            .pipe(csv.parse({ columns: true }))
             .on('error', error => reject(error))
             .on('data', row => data.push(row))
             .on('end', () => {
@@ -119,9 +105,16 @@ const register = async (username, password) => {
     }
     let data = []
     let pass = crypto.createHash('md5').update(password).digest("hex")
-    data.push([username, pass, uuidv4()])
-    console.log(data)
-    csv.stringify(data, { header: true, columns: columns }, (err, output) => {
+
+    fs.appendFileSync("users.csv", username + "," + pass + "," + uuidv4() + "\n")
+    //data.push([username, pass, uuidv4()])
+    //console.log(data)
+    /*csv.stringify(data, { header: true, columns: columns, delimiter: ',', final: true
+     }, (err, output) => {
+        if (output == "") {
+            return false
+        }
+        console.log(output)
         fs.appendFile("users.csv", output, (err) => {
             if (err) {
                 console.log(err)
@@ -130,7 +123,7 @@ const register = async (username, password) => {
                 console.log("user added")
             }
         })
-    })
+    })*/
 
 
 }
@@ -172,11 +165,12 @@ io.on("connection", (socket) => {
             socket.to(data.room).emit("welcome", rooms[data.room][socket.id])
 
         } else {
-            Object.values(users).forEach((user) => {
-                socket.emit("welcome", user)
-            })
 
-            //socket.emit("userlist", users);
+            console.log("electron")
+            console.log(users)
+            
+
+            socket.emit("userlist", users);
             //console.log(data)
             //socket.to(data.room).emit("welcome", {username: data.username, id: data.id})
             console.log("electron")
@@ -207,6 +201,10 @@ io.on("connection", (socket) => {
             }
             delete globalUsers[socket.id]
         }
+    })
+    socket.on("message", (data) => {
+        console.log("msg")
+        console.log(data)
     })
 
 
