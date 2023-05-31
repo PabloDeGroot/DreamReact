@@ -92,8 +92,8 @@ function Room(props) {
 
     }, [])
 
-
-    peer.off('connection').on('connection', (conn) => {
+//esto es cuando se envia DataConnection cambiar a call
+    peer.off('connection').on('connection', (conn) => { 
         let auxDreams = dreams;
         console.log("AAAAA");
 
@@ -130,7 +130,7 @@ function Room(props) {
                 data: data
             }
 
-            //setDreams(auxDreams);
+            //setDreams(auxDreams); 
             forceUpdate();
         });
 
@@ -351,7 +351,7 @@ function Dream(props) {
     useEffect(() => {
         if (props.data) {
             //{ type: "mousedown", pos: { x: x, y: y } }
-            console.log("sending welcome");
+            console.log("sending  e");
             console.log(props.data);
             if (!props.data.open) {
                 props.data.on("open", () => {
