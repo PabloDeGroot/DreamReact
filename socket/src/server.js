@@ -215,7 +215,7 @@ io.on("connection", (socket) => {
         } else {
 
             console.log("electron")
-            console.log(users)
+      
             
 
             socket.emit("userlist", users);
@@ -223,6 +223,7 @@ io.on("connection", (socket) => {
             //socket.to(data.room).emit("welcome", {username: data.username, id: data.id})
             console.log("electron")
         }
+        console.log(users)
 
         //console.log(users);
 

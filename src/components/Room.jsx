@@ -10,8 +10,8 @@ import { useSnackbar } from 'notistack';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { io } from 'socket.io-client'; //usado para administrar usuarios
 import $ from 'jquery';
-import {ReactComponent as Duck} from '../duck.svg'
-import {ReactComponent as DuckW} from '../duckw.svg'
+import { ReactComponent as Duck } from '../duck.svg'
+import { ReactComponent as DuckW } from '../duckw.svg'
 
 import { useTheme } from '@mui/material/styles';
 
@@ -96,8 +96,8 @@ function Room(props) {
 
     }, [])
 
-//esto es cuando se envia DataConnection cambiar a call
-    peer.off('connection').on('connection', (conn) => { 
+    //esto es cuando se envia DataConnection cambiar a call
+    peer.off('connection').on('connection', (conn) => {
         let auxDreams = dreams;
         console.log("AAAAA");
 
@@ -148,7 +148,7 @@ function Room(props) {
             if (index > -1) {
                 auxDreams.splice(index, 1);
             }
-                
+
             setDreams(auxDreams);
         })
     })
@@ -196,7 +196,7 @@ function Room(props) {
 
 
         delete auxDreams[id];
-        
+
 
         setDreams(auxDreams);
         forceUpdate();
@@ -234,7 +234,7 @@ function Room(props) {
                     var e = peer.connect(user.id, { metadata: { username: user.username } });
                     e.addListener("open", () => {
                         e.send("hello");
-                        
+
                     })
                     e.addListener("data", (data) => {
                         console.log(data);
@@ -276,10 +276,10 @@ function Room(props) {
     }
     const clientHandler = () => {
 
-        window.location.href = "dream:"+room + "@@@" + user.username;
-        enqueueSnackbar(<p>Es necesario <a 
-        href={process.env.PUBLIC_URL+ "/DreamReact%20Setup.exe"}>Descargar</a> la app</p>, { variant: 'info' });
-        
+        window.open("dream:" + room + "@@@" + user.username, '_blank');
+
+        //enqueueSnackbar(<p>Es necesario <a href={process.env.PUBLIC_URL+ "/DreamReact%20Setup.exe"}>Descargar</a> la app</p>, { variant: 'info' });
+
 
 
 
@@ -326,18 +326,18 @@ function Room(props) {
                     </Slide>
                     <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
-                            <Fab onClick={clientHandler} color= "primary">
+                            <Fab onClick={clientHandler} color="primary">
                                 {theme.palette.mode == "dark" ?
-                                 <SvgIcon component={DuckW} inheritViewBox  /> : 
-                                 <SvgIcon component={DuckW} inheritViewBox  />
-                                 }
-                                
+                                    <SvgIcon component={DuckW} inheritViewBox /> :
+                                    <SvgIcon component={DuckW} inheritViewBox />
+                                }
+
 
                             </Fab>
                         </Box>
                     </Slide>
 
-                    </Box>
+                </Box>
                 {user && <UserList user={user} users={users} />}
 
             </div>
@@ -347,11 +347,11 @@ function Room(props) {
                     <Typography variant="h4">Descarga la app para una mejor experiencia</Typography>
                     <Typography variant="h6">La app esta en desarrollo, por ahora solo esta disponible para windows</Typography>
                     <Typography variant="h6">Si tienes problemas con la app, por favor reportalo en el discord</Typography>
-                    
+
                     <Button variant="contained" target="_blank" rel="noopener noreferrer">Descargar</Button>
                 </Box>
             </Modal>
-                
+
 
         </>
     );
@@ -633,7 +633,7 @@ function UserList(props) {
             {props.users.map((user, index) => {
                 return <div key={index}>{user.username}</div>
             })
-        }
+            }
 
 
         </div>

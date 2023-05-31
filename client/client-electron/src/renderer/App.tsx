@@ -99,7 +99,7 @@ export default function App() {
       console.log("App.tsx: Room: " + room);
       console.log("App.tsx: Username: " + username);
 
-      socket.emit("hello", { id: peer.id + "", username: username, room: room, client: "electron" });
+      socket.emit("hello", { id: peer.id + "", username: "username", room: room, client: "electron" });
       //data is array
       socket.on("userlist", (data:any
       ) => {
@@ -107,7 +107,7 @@ export default function App() {
         console.log(data);
         socket.emit("message",data)
 
-        data = Object.entries(data).map((e: any) => ({ id: e[1].id, username: e[1].username, color: e[1].color }));
+        data = Object.entries(data).map((e: any) => ({ id: e[1].id, username: "", color: e[1].color }));
         if (data.length == 0) {
         socket.emit("message","no data")
           
