@@ -40,6 +40,7 @@ function Room(props) {
     const [spectators, setSpectators] = React.useState([]);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const [modalOpen, setModalOpen] = React.useState(false);
+    const [mainUserStream, setMainUserStream] = React.useState(null);
     const theme = useTheme();
 
     const forceUpdate = () => {
@@ -122,10 +123,9 @@ function Room(props) {
         console.log("AAAAA");
 
         call.on('stream', (stream) => {
-            var test = stream.getVideoTracks()[0];
+            //var test = stream.getVideoTracks()[0];
 
-
-            console.log("AAAAA");
+            //console.log("AAAAA");
             var auxDreams = dreams;
             let data = auxDreams[call.peer]?.data;
             auxDreams[call.peer] = {
@@ -137,7 +137,6 @@ function Room(props) {
             //setDreams(auxDreams); 
             forceUpdate();
         });
-
 
         call.on("error", (e) => {
             console(e);
@@ -152,8 +151,6 @@ function Room(props) {
             setDreams(auxDreams);
         })
     })
-
-
 
     socket.off("welcome").on("welcome", (user) => {
         console.log(user);
@@ -172,13 +169,11 @@ function Room(props) {
             ]
         })
         if (stream) {
-
             peer.call(user.id, stream, { metadata: { username: user.username } })
 
         }
     })
     socket.off("goodbye").on("goodbye", (id) => {
-
         var user = users.find(u => u.id == id);
 
         if (user) {
@@ -193,14 +188,10 @@ function Room(props) {
             setUsers(auxUsers);
         }
         var auxDreams = dreams;
-
-
         delete auxDreams[id];
-
 
         setDreams(auxDreams);
         forceUpdate();
-
 
     })
 
@@ -214,11 +205,6 @@ function Room(props) {
     })
 
     const startScreenCap = () => {
-
-
-
-
-
         var video_constraints = {
 
             optional: []
@@ -251,15 +237,12 @@ function Room(props) {
                     }
                 });
 
-
                 stream.getVideoTracks()[0].onended = function () {
                     toggleScreenCap(false);
                     stopScreenCap();
 
                 };
-
             }
-
         )
     }
     const stopScreenCap = () => {
@@ -297,11 +280,34 @@ function Room(props) {
     return (
         <>
             <div className="roomBack" >
+
+
+                    <div className="dreamContainer " >
+                        <div className="MainDream">
+                            {/*
+                            <Dream user={user} color={theme.palette.primary.main} stream={dreams[mainUserStream]?.stream} data={dreams[mainUserStream]?.data} username={dreams[mainUserStream]?.username}></Dream>
+                            */}
+                            <Dream></Dream>
+                        </div>
+
+                        <div className='sideList'>
+                            <Dream></Dream>
+                            <Dream></Dream>
+                            <Dream></Dream>
+                            {/* {Object.keys(dreams).filter((key) => dreams[key].username != mainUserStream).map((key) => {
+                                return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
+                            })}*/}
+
+                        </div>
+
+                    </div>
+{/*
                 <div className="dreamContainer grid" >
                     {Object.keys(dreams).map((key) => {
                         return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
                     })}
-                </div>
+                    <Dream></Dream>
+                </div>*/ }
                 {isScreenCapOn &&
                     <Draggable bounds="parent">
                         <div className='🎈'>
@@ -537,19 +543,16 @@ function Dream(props) {
 
         props.data.send({ type: "keyup", key: e.key.toLowerCase() });
     }
-
     //onMouseEnter={handleMouseOver} onDoubleClick={doubleClickHandler} onMouseLeave={() => { setHover(false) }} 
     return (
         <>
-
             <div
-
                 className="☁" >
-                <div className='fullscreen'>
+                {/*<div className='fullscreen'>
                     <IconButton onClick={doubleClickHandler} size='large'>
                         <Icon sx={{ color: "white" }}>{maximized ? "fullscreen_exit" : "fullscreen"}</Icon>
                     </IconButton>
-                </div>
+                </div> */}
                 <Collapse style={{ zIndex: 100, position: "absolute", width: "100%" }} in={hover}>
                     <Paper square style={{ opacity: 0.5, backdropFilter: "blur(50px)" }}  >
                         <Box justifyContent={"center"} textAlign={"center"}><Typography fontWeight={"bold"}>{props.username}</Typography></Box>
@@ -559,16 +562,13 @@ function Dream(props) {
                     <Box className='loading'>
                         <CircularProgress />
                     </Box>}
-
                 <div
-
                     onMouseMove={
                         handleMouseMove
                     }
                     onMouseDown={
                         handleMouseDown
                     }
-
                     onMouseUp={
                         handleMouseUp
                     }
@@ -576,20 +576,13 @@ function Dream(props) {
                         handleScroll
                     }
                     onKeyDown={() => { console.log("keydown") }}
-
-
-
                     className="streamContainer" >
-
-
                     <ReactPlayer config={{
                         file: {
                             attributes: { 'preload': 'none', 'muted': true }
                         }
                     }} muted={!soundOn} volume={soundOn ? 100 : 0} onPlay={() => { setPlay(true); }
-
                     } onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
-
                 </div>
             </div>
         </>

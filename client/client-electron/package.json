@@ -222,7 +222,10 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false
+
     },
     "linux": {
       "target": [
@@ -240,12 +243,12 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
+      "owner": "PabloDG",
+      "repo": "DreamReact"
     }
   },
   "collective": {
-    "url": "https://opencollective.com/electron-react-boilerplate-594"
+    "url": "https://duckhub.dev"
   },
   "devEngines": {
     "node": ">=14.x",

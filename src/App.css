@@ -53,13 +53,18 @@
   border-radius: 20px;
   overflow: hidden;
   background-color: #00ffff69;
-  max-width: 55%;
-  max-height: 60%;
+
   box-shadow: 0px 0px 41px -11px rgba(0,0,0,1);
   display: flex;
   justify-content: center;
 }
-
+.MainDream{
+  display: flex;
+  flex-grow: 3;
+}
+.sideList{
+  flex-grow: 1;
+}
 .☁.maximized {
   display: flex;
   max-width: none;
