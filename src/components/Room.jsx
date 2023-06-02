@@ -370,7 +370,7 @@ function Dream(props) {
     const [play, setPlay] = React.useState(false);
     const [soundOn, setSoundOn] = React.useState(false);
     const [maximized, setMaximized] = React.useState(false);
-
+    const theme = useTheme();
     useEffect(() => {
         if (props.data) {
             //{ type: "mousedown", pos: { x: x, y: y } }
@@ -547,7 +547,11 @@ function Dream(props) {
     return (
         <>
             <div
-                className="☁" >
+                className="☁" 
+                    style={{
+                        backgroundColor: theme.palette.secondary.light.split(")")[0] + ",0.4)",
+                    }}
+                >
                 {/*<div className='fullscreen'>
                     <IconButton onClick={doubleClickHandler} size='large'>
                         <Icon sx={{ color: "white" }}>{maximized ? "fullscreen_exit" : "fullscreen"}</Icon>
