@@ -282,26 +282,29 @@ function Room(props) {
             <div className="roomBack" >
 
 
-                    <div className="dreamContainer " >
-                        <div className="MainDream">
-                            {/*
-                            <Dream user={user} color={theme.palette.primary.main} stream={dreams[mainUserStream]?.stream} data={dreams[mainUserStream]?.data} username={dreams[mainUserStream]?.username}></Dream>
+                <div className="dreamContainer " >
+                    <div className="MainDream">
+                        {/*
+                            <Dream></Dream>
+
                             */}
-                            <Dream></Dream>
-                        </div>
-
-                        <div className='sideList'>
-                            <Dream></Dream>
-                            <Dream></Dream>
-                            <Dream></Dream>
-                            {/* {Object.keys(dreams).filter((key) => dreams[key].username != mainUserStream).map((key) => {
-                                return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
-                            })}*/}
-
-                        </div>
+                        <Dream user={user} color={theme.palette.primary.main} stream={dreams[mainUserStream]?.stream} data={dreams[mainUserStream]?.data} username={dreams[mainUserStream]?.username}></Dream>
 
                     </div>
-{/*
+
+                    <div className='sideList'>
+
+                        {/*
+                            <Dream></Dream>
+                            <Dream></Dream>
+                            <Dream></Dream>*/}
+                        {Object.keys(dreams).filter((key) => dreams[key].username != mainUserStream).map((key) => {
+                            return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
+                        })}
+                    </div>
+
+                </div>
+                {/*
                 <div className="dreamContainer grid" >
                     {Object.keys(dreams).map((key) => {
                         return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
@@ -547,11 +550,11 @@ function Dream(props) {
     return (
         <>
             <div
-                className="☁" 
-                    style={{
-                        backgroundColor: theme.palette.secondary.light.split(")")[0] + ",0.4)",
-                    }}
-                >
+                className="☁"
+                style={{
+                    backgroundColor: theme.palette.secondary.light.split(")")[0] + ",0.4)",
+                }}
+            >
                 {/*<div className='fullscreen'>
                     <IconButton onClick={doubleClickHandler} size='large'>
                         <Icon sx={{ color: "white" }}>{maximized ? "fullscreen_exit" : "fullscreen"}</Icon>

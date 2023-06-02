@@ -44,15 +44,15 @@ class AppUpdater {
 if (process.argv[1] != null) {
   //dream:room@@@username
   //remove dream:
-//global.room = process.argv[1].split("@@@")[0].split(":")[1];
-//global.username = process.argv[1].split("@@@")[1];
-  global.room = "room";
-  global.username = "username";
+global.room = process.argv[1].split("@@@")[0].split(":")[1];
+global.username = process.argv[1].split("@@@")[1];
+  //global.room = "room";
+  //global.username = "username";
 console.log(process.argv);
 }else{
-  //app.quit();
-  global.room = "room";
-  global.username = "username";
+  app.quit();
+  //global.room = "room";
+  //global.username = "username";
 
   
 }

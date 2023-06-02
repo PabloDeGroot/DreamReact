@@ -222,9 +222,7 @@
     "win": {
       "target": [
         "nsis"
-      ],
-      "createDesktopShortcut": false,
-      "createStartMenuShortcut": false
+      ]
 
     },
     "linux": {
