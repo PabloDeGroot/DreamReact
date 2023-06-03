@@ -15,7 +15,7 @@ const local = false;
 
 
 
-var url = local ? "ws://localhost:2000" : "ws://duckhub.dev:2000"
+var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 
 const socket = io(url, { secure: true, reconnection: true, rejectUnauthorized: false })
 
