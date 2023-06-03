@@ -173,7 +173,7 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-/*
+/**/
   mainWindow.setAlwaysOnTop(true);
   mainWindow.setIgnoreMouseEvents(true);
   mainWindow.setResizable(false);
@@ -183,7 +183,7 @@ const createWindow = async () => {
   mainWindow.setMenu(null);
   mainWindow.setMovable(false);
   mainWindow.setSkipTaskbar(true);
-  mainWindow.setFocusable(false);*/
+  mainWindow.setFocusable(false);
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');

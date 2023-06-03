@@ -27,7 +27,9 @@ function Room(props) {
 
     const socket = props.socket;
     const [dreams, setDreams] = React.useState({});
+    const [dreamData, setDreamData] = React.useState({});//{username:username,stream:stream,data:data}
     const [isOptionsExpanded, expandOptions] = React.useState(true);
+    const [isDreamsExpanded, expandDreams] = React.useState(true);
     const [isMicOn, toggleMic] = React.useState(true);
     const [isScreenCapOn, toggleScreenCap] = React.useState(false);
     const [isAudioOn, toggleAudio] = React.useState(true);
@@ -41,6 +43,7 @@ function Room(props) {
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const [modalOpen, setModalOpen] = React.useState(false);
     const [mainUserStream, setMainUserStream] = React.useState(null);
+    const [mainDreamData, setMainDreamData] = React.useState(null);//{username:username,stream:stream,data:data}
     const theme = useTheme();
 
     const forceUpdate = () => {
@@ -99,7 +102,10 @@ function Room(props) {
 
     //esto es cuando se envia DataConnection cambiar a call
     peer.off('connection').on('connection', (conn) => {
-        let auxDreams = dreams;
+        conn.on("data", (data) => {
+            console.log(data);
+        })
+        /*let auxDreams = dreams;
         console.log("AAAAA");
 
         let stream = dreams[conn.peer]?.stream;
@@ -108,10 +114,34 @@ function Room(props) {
             stream: stream,
             data: conn
         }
-        setDreams(auxDreams);
+        if (mainUserStream == null) {
+            setMainUserStream(
+                {
+                    username: conn.metadata.username,
+                    stream: stream,
+                    data: conn
+                }
+            );
+        }
+        
+
+        //setDreams(auxDreams);
+
+        forceUpdate();*/
+        let auxDreamData = dreamData;
+        auxDreamData[conn.peer] = {
+            data: conn,
+        }
+        setDreamData(auxDreamData);
+        if (mainDreamData == null) {
+            setMainDreamData(auxDreamData[conn.peer]);
+        }
+
+
         forceUpdate();
 
     });
+
 
     peer.off('call').on('call', (call) => {
         call.answer();
@@ -131,8 +161,16 @@ function Room(props) {
             auxDreams[call.peer] = {
                 username: call.metadata.username,
                 stream: stream,
-                data: data
             }
+            if (mainUserStream == null) {
+                setMainUserStream(
+                    {
+                        username: call.metadata.username,
+                        stream: stream,
+                    }
+                );
+            }
+            setDreams(auxDreams);
 
             //setDreams(auxDreams); 
             forceUpdate();
@@ -140,23 +178,40 @@ function Room(props) {
 
         call.on("error", (e) => {
             console(e);
+
+        })
+        call.on("close", (e) => {
+
+            var user = users.find(u => u.id == e);
+
+
             var auxDreams = dreams;
             //delete auxDreams[call.peer];
-            //splice
-            let index = auxDreams.indexOf(call.peer);
-            if (index > -1) {
-                auxDreams.splice(index, 1);
-            }
 
+            if (mainUserStream?.username == user.username) {
+                if (Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).length > 0) {
+                    setMainUserStream({ username: dreams[Object.keys(dreams)[0]].username, stream: dreams[Object.keys(dreams)[0]].stream });
+                } else {
+                    setMainUserStream(null);
+                }
+            }
+            var auxDreamData = dreamData;
+            delete auxDreamData[call.peer];
+            setDreamData(auxDreamData);
+            let d = auxDreams[call.peer];
+            if (d != null) {
+                delete auxDreams[call.peer];
+            }
             setDreams(auxDreams);
-        })
+
+        });
     })
 
     socket.off("welcome").on("welcome", (user) => {
         console.log(user);
 
         if (users.find(u => u.username == user.username)) {
-            return;
+            // return; TODO quitar
         }
 
         enqueueSnackbar(user.username + " se a conectado!", { variant: 'success' })
@@ -186,22 +241,82 @@ function Room(props) {
             }
 
             setUsers(auxUsers);
-        }
-        var auxDreams = dreams;
-        delete auxDreams[id];
 
+
+            if (mainUserStream?.username == user.username) {
+                if (Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).length > 0) {
+                    setMainUserStream({ username: dreams[Object.keys(dreams)[0]].username, stream: dreams[Object.keys(dreams)[0]].stream });
+                } else {
+                    setMainUserStream(null);
+                }
+            }
+
+        }
+        Object.keys(dreamData).forEach((key) => {
+            if (dreamData[key].data.peer == id) {
+                let auxDreamData = dreamData;
+                delete auxDreamData[key];
+                setDreamData(auxDreamData);
+            }
+            let aux = dreams[key];
+            if (dreams[key] != null) {
+
+                if (dreams[key].stream == mainUserStream.stream) {
+                    if (Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).length > 0) {
+                        setMainUserStream({ username: dreams[Object.keys(dreams)[0]].username, stream: dreams[Object.keys(dreams)[0]].stream });
+                    } else {
+                        setMainUserStream(null);
+                    }
+                }
+                let auxDreams = dreams;
+                delete auxDreams[key];
+                setDreams(auxDreams);
+            }
+
+        })
+
+
+
+
+        var auxDreamData = dreamData;
+        delete auxDreamData[id];
+        setDreamData(auxDreamData);
+
+        var auxDreams = dreams;
+        //delete auxDreams[id];
+        let d = auxDreams[id];
+        if (d != null) {
+            delete auxDreams[id];
+        }
         setDreams(auxDreams);
+
+
         forceUpdate();
 
     })
 
     socket.off("wakeUp").on("wakeUp", (id) => {
+        var user = users.find(u => u.id == id);
+
 
         var auxDreams = dreams;
+        //delete auxDreams[call.peer];
 
-        delete auxDreams[id];
+        if (mainUserStream?.username == user.username) {
+            if (Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).length > 0) {
+                setMainUserStream({ username: dreams[Object.keys(dreams)[0]].username, stream: dreams[Object.keys(dreams)[0]].stream });
+            } else {
+                setMainUserStream(null);
+            }
+        }
+        var auxDreamData = dreamData;
+        delete auxDreamData[id];
+        setDreamData(auxDreamData);
+        let d = auxDreams[id];
+        if (d != null) {
+            delete auxDreams[id];
+        }
         setDreams(auxDreams);
-        forceUpdate();
     })
 
     const startScreenCap = () => {
@@ -214,10 +329,10 @@ function Room(props) {
 
             (stream) => {
                 setLocalStream(stream);
+                console.log(user)
 
-
-                users.map((user) => {
-                    var e = peer.connect(user.id, { metadata: { username: user.username } });
+                users.map((userAux) => {
+                    var e = peer.connect(userAux.id, { metadata: { username: user.username } });
                     e.addListener("open", () => {
                         e.send("hello");
 
@@ -225,7 +340,7 @@ function Room(props) {
                     e.addListener("data", (data) => {
                         console.log(data);
                     })
-                    var spectator = peer.call(user.id, stream, { metadata: { username: user.username } });
+                    var spectator = peer.call(userAux.id, stream, { metadata: { username: user.username } });
 
                     if (spectators) {
                         setSpectators((prevSpectators) => [
@@ -277,6 +392,10 @@ function Room(props) {
         }
 
     }
+
+    const expandDreamsHandler = () => {
+        expandDreams(!isDreamsExpanded);
+    }
     return (
         <>
             <div className="roomBack" >
@@ -285,23 +404,36 @@ function Room(props) {
                 <div className="dreamContainer " >
                     <div className="MainDream">
                         {/*
-                            <Dream></Dream>
-
+ <Dream username="aaa"></Dream>
                             */}
-                        <Dream user={user} color={theme.palette.primary.main} stream={dreams[mainUserStream]?.stream} data={dreams[mainUserStream]?.data} username={dreams[mainUserStream]?.username}></Dream>
+                        {mainUserStream != null &&
+                            <Dream user={user} color={theme.palette.primary.main} stream={mainUserStream.stream}
+                                data={mainDreamData?.data}
+                                username={mainUserStream.username}></Dream>
+                        }
 
                     </div>
 
-                    <div className='sideList'>
 
-                        {/*
-                            <Dream></Dream>
-                            <Dream></Dream>
-                            <Dream></Dream>*/}
-                        {Object.keys(dreams).filter((key) => dreams[key].username != mainUserStream).map((key) => {
-                            return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} data={dreams[key].data} username={dreams[key].username}></Dream>
-                        })}
-                    </div>
+                    {mainUserStream != null && Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).length > 0 &&
+
+
+                        <div className='sideList' style={{ maxHeight: isDreamsExpanded ? "100%" : "0px" }}>
+                            <IconButton style={{ position: 'absolute', top: '-30px' }} >
+                                <Icon className="icon" onClick={expandDreamsHandler} sx={{ color: "white" }}>{isDreamsExpanded ? "expand_more" : "expand_less"}</Icon>
+                            </IconButton>
+                            {/*
+                                <Dream></Dream>
+                                <Dream></Dream>
+                                <Dream></Dream>
+                                <Dream></Dream>
+                            */}
+                            {Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).map((key) => {
+                                return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} username={dreams[key].username}></Dream>
+                            })}
+
+
+                        </div>}
 
                 </div>
                 {/*
@@ -319,12 +451,9 @@ function Room(props) {
                     </Draggable>
                 }
                 <Box className="callOptions">
-                    <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
-                        <Icon sx={{ color: "white" }}>{isOptionsExpanded ? "expand_more" : "expand_less"}</Icon>
-                        <Typography sx={{ color: "white" }}>Cast</Typography>
-                    </IconButton>
 
-                    <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
+
+                    <Slide direction='down' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
                             <Fab onClick={screenCapHandler} color={isScreenCapOn ? "secondary" : "primary"}>
                                 <Icon >
@@ -333,21 +462,26 @@ function Room(props) {
                             </Fab>
                         </Box>
                     </Slide>
-                    <Slide direction='up' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
+                    <Slide direction='down' timeout={{ enter: 500, exit: 500 }} in={isOptionsExpanded}>
                         <Box>
                             <Fab onClick={clientHandler} color="primary">
                                 {theme.palette.mode == "dark" ?
                                     <SvgIcon component={DuckW} inheritViewBox /> :
                                     <SvgIcon component={DuckW} inheritViewBox />
                                 }
-
-
                             </Fab>
                         </Box>
                     </Slide>
-
+                    <IconButton onClick={() => { expandOptions(!isOptionsExpanded) }} className='showOptions' size='large'>
+                        <Icon sx={{ color: "white" }}>{isOptionsExpanded ? "expand_more" : "expand_less"}</Icon>
+                        <Typography sx={{ color: "white" }}>Cast</Typography>
+                    </IconButton>
                 </Box>
-                {user && <UserList user={user} users={users} />}
+                {
+                    /*
+                user && <UserList user={user} users={users} />
+                */
+                }
 
             </div>
 
@@ -555,6 +689,20 @@ function Dream(props) {
                     backgroundColor: theme.palette.secondary.light.split(")")[0] + ",0.4)",
                 }}
             >
+                <Typography
+                    style={{
+                        color: theme.palette.secondary.contrastText,
+                        position: "absolute",
+                        top: "0px",
+                        left: "0px",
+                        zIndex: 100,
+                        padding: "5px",
+                        backgroundColor: theme.palette.secondary.light.split(")")[0] + ",0.4)",
+                        borderRadius: "0px 0px 10px 0px",
+                        fontweight: "bold",
+                        pointerEvents: "none"
+                    }}
+                >{props.username}</Typography>
                 {/*<div className='fullscreen'>
                     <IconButton onClick={doubleClickHandler} size='large'>
                         <Icon sx={{ color: "white" }}>{maximized ? "fullscreen_exit" : "fullscreen"}</Icon>
@@ -584,12 +732,18 @@ function Dream(props) {
                     }
                     onKeyDown={() => { console.log("keydown") }}
                     className="streamContainer" >
-                    <ReactPlayer config={{
-                        file: {
-                            attributes: { 'preload': 'none', 'muted': true }
-                        }
-                    }} muted={!soundOn} volume={soundOn ? 100 : 0} onPlay={() => { setPlay(true); }
-                    } onReady={videoReadyHandler} width='100%' height="100%" url={props.stream}></ReactPlayer>
+                    {<ReactPlayer
+ 
+                    
+                        config={{
+                            file: {
+                                attributes: { 'muted': true, 'preload': "none" }
+                            },
+                            
+                        }} muted={!soundOn} volume={soundOn ? 100 : 0} onPlay={() => { setPlay(true); }
+                        } onReady={videoReadyHandler} url={props.stream}></ReactPlayer>
+
+                    }
                 </div>
             </div>
         </>

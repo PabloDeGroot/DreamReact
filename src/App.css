@@ -28,52 +28,59 @@
 
 .dreamContainer {
 
-  box-sizing: border-box;
   display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
-  justify-content: space-around;
-  position: absolute;
+  justify-content: center;
+  align-items: center;
+
+  flex-direction: column;
   background-color: #00000060;
   width: 100vw;
   height: 100vh;
+  
   transition: 1s;
-  padding-block: 10%;
 
+  /*padding-block: 10%;
+*/
 }
 
+.sideList .☁{
+  width: 20%;
+}
 .☁ {
   backdrop-filter: blur(10px);
   transition: 1s;
   display: none;
   position: relative;
-  flex-grow: 1;
-  flex-basis: 40%;
+
   margin: 10px;
   border-radius: 20px;
   overflow: hidden;
   /*background-color: #00ffff69;*/
 
-  box-shadow: 0px 0px 41px -11px rgba(0,0,0,1);
+  box-shadow: 0px 0px 41px -11px rgba(0, 0, 0, 1);
   display: flex;
   justify-content: center;
+  width: 100%;
+  align-items: center;
 }
-.MainDream{
+
+.MainDream {
   display: flex;
-  flex-grow: 3;
+  flex: 3 1 300px;
+  min-height: 300px;
+  min-width: 50%
 }
-.sideList{
+
+.sideList {
+  position: relative;
   flex-grow: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
 }
-.sideList > div{
-  border-top: #00000060 solid 1px;
-  padding: 10px;
-  transition:0.3s;
-  user-select: none;
 
-}
+
 .☁.maximized {
   display: flex;
   max-width: none;
@@ -81,7 +88,7 @@
   justify-content: center;
   width: 95%;
   height: 95%;
-  margin:0;
+  margin: 0;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -96,12 +103,22 @@
   transform: translate(-50%, 0);
 }
 
-.streamContainer {
+.streamContainer > div{
+
+  height: auto !important;
+  width: auto !important;
+
+}
+.streamContainer  video{
+  height: auto !important;
+  max-height: 100% !important;
+}
+.streamContainer{
+  height: fit-content;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-
 }
 
 .callOptions {
@@ -109,7 +126,7 @@
   padding: 10px;
   position: absolute;
   left: 50%;
-  bottom: 0px;
+  top: 0px;
   height: 80px;
   overflow: hidden;
   transform: translate(-50%, 0);
@@ -126,7 +143,7 @@
   display: flex;
   justify-content: center;
   position: absolute;
-  bottom: -20px;
+  top: -20px;
   left: 50%;
   transform: translate(-50%, 0);
 }
@@ -136,7 +153,6 @@
   background-color: #7fffd469;
   overflow: hidden;
   width: 300px;
-
   z-index: 1000;
   position: absolute;
   display: block;
@@ -144,55 +160,64 @@
 
 .🎈 {
   position: absolute;
-  margin:40px;
+  margin: 40px;
   left: 15%;
-  top:65%;
+  top: 65%;
 
 }
-.loading{
+
+.loading {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 
 }
+
 body {
   overflow: hidden;
 }
-.userList{
-  position:absolute;
+
+.userList {
+  position: absolute;
   display: block;
   border-radius: 10px;
-  bottom:15px;
-  right:15px;
+  bottom: 15px;
+  right: 15px;
   opacity: 0;
-  
+
 }
-.userList:hover{
+
+.userList:hover {
   opacity: 100;
 }
-.userList > div{
+
+.userList>div {
   border-top: #00000060 solid 1px;
   padding: 10px;
-  transition:0.3s;
+  transition: 0.3s;
   user-select: none;
 
 }
-.userList > div:hover{
+
+.userList>div:hover {
   background-color: #00000020;
 }
-.☁.maximized .fullscreen{
+
+.☁.maximized .fullscreen {
   top: 0px;
   left: 0px;
   z-index: 1000;
 }
-.☁ .fullscreen{
+
+.☁ .fullscreen {
   position: absolute;
   top: 10px;
   left: 10px;
   z-index: 1000;
 }
-.modal{
+
+.modal {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -208,7 +233,7 @@ body {
   color: white;
 }
 
-.modal > button{
+.modal>button {
   margin-top: 10px;
   padding: 10px;
   border-radius: 10px;
@@ -217,7 +242,7 @@ body {
   color: white;
   transition: 0.3s;
 }
-.modal > button:hover{
+
+.modal>button:hover {
   background-color: #00000080;
 }
-

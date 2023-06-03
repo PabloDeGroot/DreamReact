@@ -49,10 +49,10 @@ export default function App() {
 
 
 
-    var callPeer = (peer: Peer, peerid: string, stream: MediaStream) => {
-      var user = peer.connect(peerid, { metadata: { username: "electron" } });
+    var callPeer = (peer: Peer, peerid: string, stream: MediaStream, username:string) => {
+      var user = peer.connect(peerid, { metadata: { username: username } });
       setPeers((peers: any) => [...peers, user]);
-      var spectator = peer.call(peerid, stream, { metadata: { username: "electron" } });
+      var spectator = peer.call(peerid, stream, { metadata: { username: username } });
       if (user.dataChannel) {
         user.dataChannel.onerror = (e: Event) => {
           console.log("Error datachannel");
@@ -90,8 +90,8 @@ export default function App() {
     }
     var handlePeerConnect = async (peer: Peer, stream: MediaStream) => {
       console.log("App.tsx: handlePeerConnect()");
-      var room = await window.electron.screen.getRoom();
-      var username = await window.electron.screen.getUsername();
+      var room = await window.electron.screen.getRoom() as string;
+      var username = await window.electron.screen.getUsername() as string;
       if (room == undefined || username == undefined) {
         room = "room";
         username = "user";
@@ -116,11 +116,11 @@ export default function App() {
         console.log(data);
 
         data.forEach((user: any) => {
-          callPeer(peer, user.id, stream);
+          callPeer(peer, user.id, stream, username);
         });
       });
       socket.on("welcome", (data: any) => {
-        callPeer(peer, data.id, stream);
+        callPeer(peer, data.id, stream, username);
       });
     }
 
