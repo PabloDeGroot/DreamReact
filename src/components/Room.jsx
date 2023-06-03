@@ -510,6 +510,10 @@ function Dream(props) {
     const theme = useTheme();
     useEffect(() => {
         if (props.data) {
+
+            $(document).off("keydown").on("keydown", handleKeyDown);
+            $(document).off("keyup").on("keyup", handleKeyUp);
+
             //{ type: "mousedown", pos: { x: x, y: y } }
             console.log("sending  e");
             console.log(props.data);
@@ -733,13 +737,13 @@ function Dream(props) {
                     onKeyDown={() => { console.log("keydown") }}
                     className="streamContainer" >
                     {<ReactPlayer
- 
-                    
+
+
                         config={{
                             file: {
                                 attributes: { 'muted': true, 'preload': "none" }
                             },
-                            
+
                         }} muted={!soundOn} volume={soundOn ? 100 : 0} onPlay={() => { setPlay(true); }
                         } onReady={videoReadyHandler} url={props.stream}></ReactPlayer>
 
