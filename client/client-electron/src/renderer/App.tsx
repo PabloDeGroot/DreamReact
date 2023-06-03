@@ -17,7 +17,7 @@ const local = false;
 
 var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 
-const socket = io(url, { secure: false, reconnection: true, rejectUnauthorized: false })
+const socket = io(url, { secure: true, reconnection: true, rejectUnauthorized: false })
 
 const username = "user";
 
