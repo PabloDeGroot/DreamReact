@@ -229,6 +229,7 @@ function Room(props) {
         }
     })
     socket.off("goodbye").on("goodbye", (id) => {
+
         var user = users.find(u => u.id == id);
 
         if (user) {
@@ -253,26 +254,27 @@ function Room(props) {
 
         }
         Object.keys(dreamData).forEach((key) => {
-            if (dreamData[key].data.peer == id) {
-                let auxDreamData = dreamData;
-                delete auxDreamData[key];
-                setDreamData(auxDreamData);
-            }
-            let aux = dreams[key];
-            if (dreams[key] != null) {
-
-                if (dreams[key].stream == mainUserStream.stream) {
-                    if (Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).length > 0) {
-                        setMainUserStream({ username: dreams[Object.keys(dreams)[0]].username, stream: dreams[Object.keys(dreams)[0]].stream });
-                    } else {
-                        setMainUserStream(null);
-                    }
+            if (key == id) {
+                if (dreamData[key].data.peer == id) {
+                    let auxDreamData = dreamData;
+                    delete auxDreamData[key];
+                    setDreamData(auxDreamData);
                 }
-                let auxDreams = dreams;
-                delete auxDreams[key];
-                setDreams(auxDreams);
-            }
+                let aux = dreams[key];
+                if (dreams[key] != null) {
 
+                    if (dreams[key].stream == mainUserStream.stream) {
+                        if (Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).length > 0) {
+                            setMainUserStream({ username: dreams[Object.keys(dreams)[0]].username, stream: dreams[Object.keys(dreams)[0]].stream });
+                        } else {
+                            setMainUserStream(null);
+                        }
+                    }
+                    let auxDreams = dreams;
+                    delete auxDreams[key];
+                    setDreams(auxDreams);
+                }
+            }
         })
 
 
