@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
-const local = false;
+const local = true;
 
 var httpServer;
 

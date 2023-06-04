@@ -68,7 +68,8 @@
   display: flex;
   flex: 3 1 300px;
   min-height: 300px;
-  min-width: 50%
+  min-width: 50%;
+  width: 100%;
 }
 
 .sideList {
@@ -105,8 +106,10 @@
 
 .streamContainer > div{
 
-  height: auto !important;
-  width: auto !important;
+  height: 100% !important;
+  width: 100% !important;
+  align-items: center;
+  display: flex;
 
 }
 .streamContainer  video{
@@ -114,7 +117,7 @@
   max-height: 100% !important;
 }
 .streamContainer{
-  height: fit-content;
+  height: 100%;
   width: 100%;
   display: flex;
   justify-content: center;

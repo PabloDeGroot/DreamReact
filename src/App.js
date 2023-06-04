@@ -57,7 +57,7 @@ const randomSecondaryColor = () => {
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
-const local = false;
+const local = true;
 
 var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 

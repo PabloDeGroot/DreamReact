@@ -24,7 +24,6 @@ function Room(props) {
     let navigate = useNavigate();
     const { room } = useParams()
 
-
     const socket = props.socket;
     const [dreams, setDreams] = React.useState({});
     const [dreamData, setDreamData] = React.useState({});//{username:username,stream:stream,data:data}
@@ -43,6 +42,7 @@ function Room(props) {
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const [modalOpen, setModalOpen] = React.useState(false);
     const [mainUserStream, setMainUserStream] = React.useState(null);
+    const [mainDream, setMainDream] = React.useState(null);//{username:username,stream:stream,data:data}
     const [mainDreamData, setMainDreamData] = React.useState(null);//{username:username,stream:stream,data:data}
     const theme = useTheme();
 
@@ -100,6 +100,12 @@ function Room(props) {
 
     }, [])
 
+    useEffect(() => {
+        if (mainUserStream != null && mainDreamData != null){
+        setMainDream(<Dream user={user} color={theme.palette.primary.main} stream={mainUserStream?.stream}
+            data={mainDreamData?.data}
+            username={mainUserStream?.username}></Dream>);}
+    }, [mainUserStream, mainDreamData])
     //esto es cuando se envia DataConnection cambiar a call
     peer.off('connection').on('connection', (conn) => {
         conn.on("data", (data) => {
@@ -171,8 +177,6 @@ function Room(props) {
                 );
             }
             setDreams(auxDreams);
-
-            //setDreams(auxDreams); 
             forceUpdate();
         });
 
@@ -181,10 +185,7 @@ function Room(props) {
 
         })
         call.on("close", (e) => {
-
             var user = users.find(u => u.id == e);
-
-
             var auxDreams = dreams;
             //delete auxDreams[call.peer];
 
@@ -398,6 +399,15 @@ function Room(props) {
     const expandDreamsHandler = () => {
         expandDreams(!isDreamsExpanded);
     }
+
+    const changeMainDream = (peerid) => {
+
+        setMainUserStream({ username: dreams[peerid].username, stream: dreams[peerid].stream });
+        setMainDreamData(dreamData[peerid]);
+        forceUpdate();
+    }
+
+
     return (
         <>
             <div className="roomBack" >
@@ -408,11 +418,12 @@ function Room(props) {
                         {/*
  <Dream username="aaa"></Dream>
                             */}
-                        {mainUserStream != null &&
+                        {/*mainUserStream != null &&
                             <Dream user={user} color={theme.palette.primary.main} stream={mainUserStream.stream}
                                 data={mainDreamData?.data}
                                 username={mainUserStream.username}></Dream>
-                        }
+                        */}
+                        {mainDream}
 
                     </div>
 
@@ -431,7 +442,7 @@ function Room(props) {
                                 <Dream></Dream>
                             */}
                             {Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).map((key) => {
-                                return <Dream user={user} color={theme.palette.primary.main} stream={dreams[key].stream} username={dreams[key].username}></Dream>
+                                return <Dream onClick={()=>{changeMainDream(key)}} user={user} color={theme.palette.primary.main} stream={dreams[key].stream} username={dreams[key].username}></Dream>
                             })}
 
 
@@ -541,41 +552,6 @@ function Dream(props) {
 
     }
 
-    const doubleClickHandler = (e) => {
-
-        var target = e.target.parentElement.parentElement.parentElement;
-        console.log(target);
-        if (target.classList.contains("☁")) {
-
-            var parent = target.parentElement;
-            parent.classList.toggle("grid");
-            target.classList.toggle("maximized")
-            setMaximized(!maximized);
-            setHover(false);
-        }
-        if (!maximized) {
-            //remove all listeners
-
-            //document.addEventListener("keydown", handleKeyDown);
-            //document.addEventListener("keyup", handleKeyUp);
-            $(document).on("keydown", handleKeyDown);
-            $(document).on("keyup", handleKeyUp);
-        } else {
-            //document.removeEventListener("keydown", handleKeyDown);
-            //document.removeEventListener("keyup", handleKeyUp);
-            $(document).off("keydown");
-            $(document).off("keyup");
-        }
-
-
-
-    }
-    const handleMouseOver = (e) => {
-        if (!maximized) {
-            setHover(true)
-
-        }
-    }
     const handleMouseMove = (e) => {
         if (!props.data) {
             return;
@@ -694,6 +670,7 @@ function Dream(props) {
                 style={{
                     backgroundColor: theme.palette.secondary.light.split(")")[0] + ",0.4)",
                 }}
+                onClick={props.onClick}
             >
                 <Typography
                     style={{
@@ -708,7 +685,7 @@ function Dream(props) {
                         fontweight: "bold",
                         pointerEvents: "none"
                     }}
-                >{props.username}</Typography>
+                >{props.stream.id}</Typography>
                 {/*<div className='fullscreen'>
                     <IconButton onClick={doubleClickHandler} size='large'>
                         <Icon sx={{ color: "white" }}>{maximized ? "fullscreen_exit" : "fullscreen"}</Icon>

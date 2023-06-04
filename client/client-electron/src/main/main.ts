@@ -98,7 +98,7 @@ ipcMain.on('scroll', async (event, arg) => {
   var scroll = arg.scroll;
   var userPos = robot.getMousePos();
   robot.moveMouse(arg.x, arg.y);
-  robot.scrollMouse(scroll, 0);
+  robot.scrollMouse(0, scroll);
   robot.moveMouse(userPos.x, userPos.y);
   event.reply('scroll', "done");
 });
@@ -151,9 +151,14 @@ const createWindow = async () => {
   if (isDebug && false) {
     await installExtensions();
   }
+     
+  let { width, height } = require('electron').screen.getPrimaryDisplay().size; // TODO : get scale factor https://www.electronjs.org/docs/latest/api/structures/display  
 
+  width = screen.getPrimaryDisplay().workAreaSize.width;
+  height = screen.getPrimaryDisplay().workAreaSize.height;
+  width = width * screen.getPrimaryDisplay().scaleFactor;
+  height = height * screen.getPrimaryDisplay().scaleFactor;
 
-  let { width, height } = require('electron').screen.getPrimaryDisplay().size;
   mainWindow = new BrowserWindow({
     show: false,
     width: width,
