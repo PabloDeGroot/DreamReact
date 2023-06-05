@@ -633,7 +633,7 @@ function Dream(props) {
 
     }
     const handleKeyDown = (e) => {
-        if (!props.data || e.target.tagName != "VIDEO") {
+        if (!props.data ) {
             return;
         }
         //win key
@@ -644,7 +644,7 @@ function Dream(props) {
         props.data.send({ type: "keydown", key: e.key.toLowerCase() });
     }
     const handleKeyUp = (e) => {
-        if (!props.data || e.target.tagName != "VIDEO") {
+        if (!props.data ) {
             return;
         }
         //win key
