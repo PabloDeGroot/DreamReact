@@ -554,7 +554,7 @@ function Dream(props) {
     }
 
     const handleMouseMove = (e) => {
-        if (!props.data) {
+        if (!props.data || e.target.tagName != "VIDEO") {
             return;
         }
         var rect = e.target.getBoundingClientRect();
@@ -575,7 +575,7 @@ function Dream(props) {
 
     }
     const handleMouseDown = (e) => {
-        if (!props.data) {
+        if (!props.data || e.target.tagName != "VIDEO") {
             return;
         }
         var rect = e.target.getBoundingClientRect();
@@ -591,7 +591,7 @@ function Dream(props) {
 
     }
     const handleScroll = (e) => {
-        if (!props.data) {
+        if (!props.data || e.target.tagName != "VIDEO") {
             return;
         }
 
@@ -610,7 +610,7 @@ function Dream(props) {
         props.data.send({ type: "scroll", scroll: scroll, pos: { x: x, y: y } });
     }
     const handleMouseUp = (e) => {
-        if (!props.data) {
+        if (!props.data || e.target.tagName != "VIDEO") {
             return;
         }
 
@@ -638,8 +638,7 @@ function Dream(props) {
 
     }
     const handleKeyDown = (e) => {
-        if (!props.data) {
-            console.log(e);
+        if (!props.data || e.target.tagName != "VIDEO") {
             return;
         }
         //win key
@@ -650,8 +649,7 @@ function Dream(props) {
         props.data.send({ type: "keydown", key: e.key.toLowerCase() });
     }
     const handleKeyUp = (e) => {
-        if (!props.data) {
-            console.log(e);
+        if (!props.data || e.target.tagName != "VIDEO") {
             return;
         }
         //win key
