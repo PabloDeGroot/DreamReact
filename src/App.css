@@ -107,7 +107,7 @@
 .streamContainer > div{
 
   height: 100% !important;
-  width: 100% !important;
+  width: auto !important;
   align-items: center;
   display: flex;
   justify-content: center;
