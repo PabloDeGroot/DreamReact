@@ -102,7 +102,8 @@ function Room(props) {
 
     useEffect(() => {
         if (mainUserStream != null && mainDreamData != null){
-        setMainDream(<Dream user={user} color={theme.palette.primary.main} stream={mainUserStream?.stream}
+        setMainDream(<Dream key={mainUserStream?.stream.id}
+             user={user} color={theme.palette.primary.main} stream={mainUserStream?.stream}
             data={mainDreamData?.data}
             username={mainUserStream?.username}></Dream>);}
     }, [mainUserStream, mainDreamData])
@@ -442,7 +443,7 @@ function Room(props) {
                                 <Dream></Dream>
                             */}
                             {Object.keys(dreams).filter((key) => dreams[key].stream != mainUserStream.stream).map((key) => {
-                                return <Dream onClick={()=>{changeMainDream(key)}} user={user} color={theme.palette.primary.main} stream={dreams[key].stream} username={dreams[key].username}></Dream>
+                                return <Dream key={dreams[key].stream.id} onClick={()=>{changeMainDream(key)}} user={user} color={theme.palette.primary.main} stream={dreams[key].stream} username={dreams[key].username}></Dream>
                             })}
 
 
@@ -685,17 +686,12 @@ function Dream(props) {
                         fontweight: "bold",
                         pointerEvents: "none"
                     }}
-                >{props.stream.id}</Typography>
+                >{props.username}</Typography>
                 {/*<div className='fullscreen'>
                     <IconButton onClick={doubleClickHandler} size='large'>
                         <Icon sx={{ color: "white" }}>{maximized ? "fullscreen_exit" : "fullscreen"}</Icon>
                     </IconButton>
                 </div> */}
-                <Collapse style={{ zIndex: 100, position: "absolute", width: "100%" }} in={hover}>
-                    <Paper square style={{ opacity: 0.5, backdropFilter: "blur(50px)" }}  >
-                        <Box justifyContent={"center"} textAlign={"center"}><Typography fontWeight={"bold"}>{props.username}</Typography></Box>
-                    </Paper>
-                </Collapse>
                 {!play &&
                     <Box className='loading'>
                         <CircularProgress />

@@ -18,6 +18,7 @@ import Login from './components/Login';
 import Room from './components/Room';
 import { ThemeProvider, createTheme, styled } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
+const local = false;
 
 const randomPrimaryColor = () => {
   const colors = [
@@ -57,7 +58,6 @@ const randomSecondaryColor = () => {
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
-const local = true;
 
 var url = local ? "ws://localhost:2000" : "wss://duckhub.dev:2000"
 

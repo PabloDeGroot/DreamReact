@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
-const local = true;
+const local = false;
 
 var httpServer;
 
@@ -232,7 +232,8 @@ io.on("connection", (socket) => {
 
     })
     socket.on("stop", (data) => {
-        socket.to(data.room).emit("wakeUp", rooms[data.room][socket.id].id);
+        if(rooms[data.room] == undefined && rooms[data.room][socket.id] == undefined){
+        socket.to(data.room).emit("wakeUp", rooms[data.room][socket.id].id);}
     })
     socket.on('disconnect', () => {
         console.log("disconnect");
