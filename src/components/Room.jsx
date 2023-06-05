@@ -377,14 +377,9 @@ function Room(props) {
 
     }
     const clientHandler = () => {
-
         window.open("dream:" + room + "@@@" + user.username, '_blank');
-
-        //enqueueSnackbar(<p>Es necesario <a href={process.env.PUBLIC_URL+ "/DreamReact%20Setup.exe"}>Descargar</a> la app</p>, { variant: 'info' });
-
-
-
-
+        enqueueSnackbar(<p>Es necesario <a href={process.env.PUBLIC_URL+ "/DreamReact%20Setup.exe"}>Descargar</a> la app</p>, { variant: 'info' });
+    
     }
     const screenCapHandler = () => {
 
